@@ -50,7 +50,7 @@ $factory->define(App\Models\Events::class, function (Faker $faker)
         $freq_term  = null;
 
         $start_date = Carbon::now();
-        $end_date   = Carbon::now('+2 hours');
+        $end_date   = Carbon::now()->addHours(2);
     }
 
     return [

@@ -11,7 +11,8 @@
             <a href="{{ route('web.posts') }}"   class="hover:text-indigo-600">Blog</a>
             <a href="{{ route('web.events') }}"  class="hover:text-indigo-600">Events</a>
             <a href="{{ route('web.gallery') }}" class="hover:text-indigo-600">Gallery</a>
-            <a href="{{ route('web.sermons') }}" class="hover:text-indigo-600">Sermons</a>
+            <a href="{{ route('web.sermons') }}"   class="hover:text-indigo-600">Sermons</a>
+            <a href="{{ route('web.bulletins') }}" class="hover:text-indigo-600">Bulletins</a>
             <a href="{{ route('web.faq') }}"     class="hover:text-indigo-600">FAQ</a>
             <a href="{{ route('web.prayer') }}"  class="hover:text-indigo-600">Prayer</a>
             <a href="{{ route('web.help') }}"    class="hover:text-indigo-600">Help</a>

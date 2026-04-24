@@ -1,34 +1,42 @@
 <?php
+
 namespace Database\Seeders;
+
 use Illuminate\Database\Seeder;
 use App\Models\Church;
 use App\Models\User;
 
 class GalleryTableSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
-    public function run()
+    public function run(): void
     {
-        $churchs = Church::where('status',1)->get();
-        foreach ($churchs as $church) 
-        {
-            $admin = User::where([['church_id',$church->id],['usergroup_id',3]])->first();
-            
-            factory(App\Models\Gallery::class,2)->create([
+        $churches = Church::where('status', 1)->get();
+
+        foreach ($churches as $church) {
+            $admin = User::where('church_id', $church->id)
+                         ->whereIn('usergroup_id', [1, 2, 3])
+                         ->first() ?? User::where('church_id', $church->id)->first();
+
+            if (! $admin) {
+                continue;
+            }
+
+            $this->command->info("Seeding galleries for church: {$church->name}...");
+
+            factory(\App\Models\Gallery::class, 8)->create([
                 'church_id'  => $church->id,
-                'created_by' => $admin->id
-            ])->each(function($gallery) use($admin){
-                factory(App\Models\Photos::class, 20)->create([
-                    'church_id'     =>  $admin->church_id,
-                    'gallery_id'    =>  $gallery->id ,
-                    'created_by'    =>  $admin->id, 
-                    'updated_by'    =>  $admin->id
+                'created_by' => $admin->id,
+                'updated_by' => $admin->id,
+            ])->each(function ($gallery) use ($church, $admin) {
+                factory(\App\Models\Photos::class, rand(8, 20))->create([
+                    'gallery_id' => $gallery->id,
+                    'church_id'  => $church->id,
+                    'created_by' => $admin->id,
+                    'updated_by' => $admin->id,
                 ]);
             });
         }
+
+        $this->command->info('Done.');
     }
 }
