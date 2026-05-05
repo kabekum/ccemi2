@@ -148,6 +148,24 @@
                                     </div>
                                 </div>
 
+                                <div class="my-3 border rounded p-3 bg-gray-50">
+                                    <p class="tw-form-label mb-2">Event Options</p>
+                                    <div class="flex flex-wrap gap-4 text-sm">
+                                        <label class="flex items-center gap-2 cursor-pointer">
+                                            <input type="checkbox" v-model="publish_to_web">
+                                            <span>Publish to Website</span>
+                                        </label>
+                                        <label class="flex items-center gap-2 cursor-pointer">
+                                            <input type="checkbox" v-model="enable_gallery">
+                                            <span>Enable Photo Gallery</span>
+                                        </label>
+                                        <label class="flex items-center gap-2 cursor-pointer">
+                                            <input type="checkbox" v-model="enable_attendance">
+                                            <span>Enable Attendance Tracking</span>
+                                        </label>
+                                    </div>
+                                </div>
+
                                 <div class="my-3">
                                     <a href="#" dusk="update-btn" class="btn btn-primary submit-btn" @click="submitForm()">Submit</a>
                                     <input type="submit" class="hidden" id="update-btn">
@@ -216,6 +234,9 @@
                 cover_image_id:'',
                 cover_image_url:'',
                 cover_image_path:'',
+                publish_to_web: true,
+                enable_gallery: true,
+                enable_attendance: false,
                 showImagePicker: false,
                 mediaImages: [],
                 showEvents:0,
@@ -277,6 +298,9 @@
                     this.cover_image_id   = '';
                     this.cover_image_path = this.events.image_raw || '';
                     this.cover_image_url  = this.events.image || '';
+                    this.publish_to_web   = this.events.publish_to_web !== false;
+                    this.enable_gallery   = this.events.enable_gallery !== false;
+                    this.enable_attendance = !!this.events.enable_attendance;
                 }
             },
 
@@ -302,6 +326,9 @@
                 formData.append('end_date',this.end_date);
                 formData.append('cover_image_id',this.cover_image_id);
                 formData.append('cover_image_path',this.cover_image_path);
+                formData.append('publish_to_web', this.publish_to_web ? 1 : 0);
+                formData.append('enable_gallery', this.enable_gallery ? 1 : 0);
+                formData.append('enable_attendance', this.enable_attendance ? 1 : 0);
 
                 axios.post('/admin/events/update/'+this.event_id,formData).then(response => {
                     this.success = response.data.success;
@@ -335,6 +362,9 @@
                 formData.append('end_date',this.end_date);
                 formData.append('cover_image_id',this.cover_image_id);
                 formData.append('cover_image_path',this.cover_image_path);
+                formData.append('publish_to_web', this.publish_to_web ? 1 : 0);
+                formData.append('enable_gallery', this.enable_gallery ? 1 : 0);
+                formData.append('enable_attendance', this.enable_attendance ? 1 : 0);
 
                 axios.post('/admin/events/validateedit/'+this.event_id,formData).then(response => {
                     this.updateEvents();

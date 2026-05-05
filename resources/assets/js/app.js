@@ -181,6 +181,15 @@ Vue.component('event-tab', require('./components/event/details/EventTab.vue').de
 Vue.component('show-event', require('./components/event/show.vue').default);
 Vue.component('event-popup', require('./components/event/Popup.vue').default);
 
+// Expose FullCalendar for vanilla-JS pages
+var _fc = require('@fullcalendar/core');
+window.FullCalendarLib = {
+    Calendar:         _fc.Calendar,
+    dayGridPlugin:    require('@fullcalendar/daygrid').default,
+    timeGridPlugin:   require('@fullcalendar/timegrid').default,
+    interactionPlugin: require('@fullcalendar/interaction').default,
+};
+
 //Edit Userprofile
 Vue.component('edit-profile', require('./components/admin/EditProfile.vue').default);
 Vue.component('change-password', require('./components/admin/ChangePassword.vue').default);

@@ -13,12 +13,12 @@ class EventController extends Controller
         $today = Carbon::today();
 
         $upcoming = Events::where('start_date', '>=', $today)
-                          ->where('select_type', 'public')
+                          ->where('publish_to_web', true)
                           ->orderBy('start_date', 'asc')
                           ->paginate(9, ['*'], 'upcoming_page');
 
         $completedRaw = Events::where('start_date', '<', $today)
-                              ->where('select_type', 'public')
+                              ->where('publish_to_web', true)
                               ->orderBy('start_date', 'desc')
                               ->get();
 

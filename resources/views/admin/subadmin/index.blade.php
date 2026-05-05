@@ -14,8 +14,9 @@
         'Prayer Coordinator'    => ['read-prayers','update-prayers'],
         'Support Coordinator'   => ['read-helps','update-helps'],
         'Web Admin'             => ['read-contacts','read-feedbacks','update-feedbacks','read-video-conferences','create-video-conferences','delete-video-conferences'],
-        'Email Blaster Manager' => ['manage-email-blaster'],
-        'CMS Manager'           => ['manage-cms'],
+        'Email Blaster Manager'    => ['manage-email-blaster'],
+        'CMS Manager'              => ['manage-cms'],
+        'Attendance Coordinator'   => ['read-attendance','create-attendance','update-attendance'],
     ];
 
     $allPermissionNames = App\Models\Permission::pluck('name')->sort()->values()->toArray();

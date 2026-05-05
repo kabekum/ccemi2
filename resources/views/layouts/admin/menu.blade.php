@@ -65,7 +65,16 @@
     <li class="py-2 px-3 {{ Request::segment('2') == 'events' ? 'active' : '' }}">
         <a href="{{ url('admin/events') }}" class="flex items-center">
             <i class="fas fa-calendar-days w-5 text-center text-sm opacity-75"></i>
-            <span class="mx-3 whitespace-no-wrap">Calendar</span>
+            <span class="mx-3 whitespace-no-wrap">Events / Calendar</span>
+        </a>
+    </li>
+    @endif
+
+    @if($isAdmin || $user->hasPermission('read-attendance'))
+    <li class="py-2 px-3 {{ Request::segment('2') == 'attendance' ? 'active' : '' }}">
+        <a href="{{ url('admin/events') }}" class="flex items-center">
+            <i class="fas fa-qrcode w-5 text-center text-sm opacity-75"></i>
+            <span class="mx-3 whitespace-no-wrap">Attendance</span>
         </a>
     </li>
     @endif

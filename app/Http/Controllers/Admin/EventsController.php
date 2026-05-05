@@ -7,6 +7,7 @@ use App\Http\Resources\Attendance as AttendanceResource;
 use App\Http\Resources\EditEvent as EditEventResource;
 use App\Http\Resources\ShowEvent as ShowEventResource;
 use App\Events\Notification\PushNotificationEvent;
+use App\Http\Requests\EventCreateRequest;
 use App\Http\Requests\EventUpdateRequest;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -53,22 +54,215 @@ class EventsController extends Controller
 
     public function index()
     {
-        $events = Events::where('church_id',Auth::user()->church_id)->get();
-        $count  = $events->count();
-        
-        $events = $events->map(function( $event, $key) {
-            $eventData = [
-                'id'        =>  $event->id,
-                'title'     =>  $event->title,
-                'start'     =>  date('Y-m-d', strtotime($event->start_date)).'T'.date('H:i:s', strtotime($event->start_date)),
-                'end'       =>  date('Y-m-d', strtotime($event->end_date)).'T'.date('H:i:s', strtotime($event->end_date)),
-                'allDay'    =>  $event->allDay
-            ];
-            return $eventData;
-        });
-        $events = json_encode($events);
+        $filter = request('filter', 'all');
+        $now    = now();
 
-        return view('admin.events.index',['events'=>$events , 'count'=>$count]);
+        $query = Events::where('church_id', Auth::user()->church_id);
+
+        if ($filter === 'upcoming') {
+            $query->where('start_date', '>=', $now)->orderBy('start_date', 'asc');
+        } elseif ($filter === 'completed') {
+            $query->where('end_date', '<', $now)->orderBy('start_date', 'desc');
+        } else {
+            $query->orderBy('start_date', 'asc');
+        }
+
+        $events = $query->paginate(15)->withQueryString();
+        $count  = $events->total();
+
+        return view('admin.events.index', compact('events', 'count', 'filter'));
+    }
+
+    public function editForm($id)
+    {
+        $event = Events::where('id', $id)->first();
+        if (!$event) abort(404);
+        if (!Gate::allows('event', $event)) abort(403);
+
+        $categories = [
+            'Culturals' => 'Culturals',
+            'Education' => 'Education',
+            'Meeting'   => 'Meeting',
+            'prayer'    => 'Prayer',
+            'sermon'    => 'Sermon',
+        ];
+
+        $eventDate       = date('Y-m-d', strtotime($event->start_date));
+        $startTime       = date('H:i',   strtotime($event->start_date));
+        $durationMinutes = $event->duration_minutes;
+        if (!$durationMinutes && $event->repeats != 1) {
+            $diff = strtotime($event->end_date) - strtotime($event->start_date);
+            $durationMinutes = max(0, (int) ($diff / 60));
+        }
+        $seriesEndDate = $event->repeats == 1 ? date('Y-m-d', strtotime($event->end_date)) : null;
+
+        return view('admin.events.edit', compact(
+            'event', 'categories', 'eventDate', 'startTime', 'durationMinutes', 'seriesEndDate'
+        ));
+    }
+
+    public function storeEdit(Request $request, $id)
+    {
+        $event = Events::where('id', $id)->first();
+        if (!$event) abort(404);
+        if (!Gate::allows('event', $event)) abort(403);
+
+        $rules = [
+            'select_type'  => 'required|in:public,private,online',
+            'schedule'     => 'required|in:0,1',
+            'title'        => 'required|max:100',
+            'description'  => 'required|max:255',
+            'category'     => 'required',
+            'organised_by' => 'required',
+            'location'     => 'required',
+            'event_date'   => 'required|date',
+            'start_time'   => 'required',
+            'duration'     => 'required',
+        ];
+        if ($request->schedule === '1') {
+            $rules['freq']            = 'required|integer|min:1';
+            $rules['freq_term']       = 'required|in:day,week,month,year';
+            $rules['series_end_date'] = 'required|date';
+        }
+        if ($request->schedule === '1' && $request->freq_term === 'week') {
+            $rules['days_of_week']   = 'required|array|min:1';
+            $rules['days_of_week.*'] = 'integer|between:0,6';
+        }
+        $request->validate($rules);
+
+        try {
+            $startDateTime = $request->event_date . ' ' . $request->start_time . ':00';
+            if ($request->schedule === '1') {
+                $endDateTime = $request->series_end_date . ' 23:59:59';
+            } else {
+                $endDateTime = date('Y-m-d H:i:s', strtotime($startDateTime) + ((int) $request->duration * 60));
+            }
+
+            $event->select_type       = $request->select_type;
+            $event->title             = $request->title;
+            $event->description       = $request->description;
+            $event->repeats           = $request->schedule;
+            $event->freq              = $request->schedule === '1' ? $request->freq : null;
+            $event->freq_term         = $request->schedule === '1' ? $request->freq_term : null;
+            $event->days_of_week      = ($request->schedule === '1' && $request->freq_term === 'week')
+                                            ? array_map('intval', $request->input('days_of_week', []))
+                                            : null;
+            $event->duration_minutes  = (int) $request->duration;
+            $event->location          = $request->location;
+            $event->category          = $request->category;
+            $event->organised_by      = $request->organised_by;
+            $event->start_date        = $startDateTime;
+            $event->end_date          = $endDateTime;
+            $event->publish_to_web    = $request->boolean('publish_to_web', false);
+            $event->enable_gallery    = $request->boolean('enable_gallery', false);
+            $event->enable_attendance = $request->boolean('enable_attendance', false);
+
+            if ($request->cover_image_id && str_starts_with($request->cover_image_id, 'media_')) {
+                $mediaId    = str_replace('media_', '', $request->cover_image_id);
+                $mediaImage = \App\Models\MediaFile::where([
+                    ['id', $mediaId],
+                    ['church_id', Auth::user()->church_id],
+                    ['media_type', 'image'],
+                ])->first();
+                if ($mediaImage) $event->image = $mediaImage->url;
+            } elseif ($request->cover_image_path) {
+                $event->image = $request->cover_image_path;
+            }
+
+            $event->save();
+
+            $ip = $this->getRequestIP();
+            $this->doActivityLog(
+                $event, Auth::user(),
+                ['ip' => $ip, 'details' => $_SERVER['HTTP_USER_AGENT']],
+                LOGNAME_EDIT_EVENT,
+                'Event Updated: ' . $event->title
+            );
+
+            return redirect()->route('admin.events.show', $event->id)
+                ->with('successmessage', 'Event "' . $event->title . '" updated successfully.');
+        } catch (Exception $e) {
+            Log::error('EventsController@storeEdit: ' . $e->getMessage());
+            return back()->withInput()->with('failmessage', 'Could not update event. Please try again.');
+        }
+    }
+
+    public function newForm()
+    {
+        $categories = [
+            'Culturals'  => 'Culturals',
+            'Education'  => 'Education',
+            'Meeting'    => 'Meeting',
+            'prayer'     => 'Prayer',
+            'sermon'     => 'Sermon',
+        ];
+
+        return view('admin.events.new', compact('categories'));
+    }
+
+    public function storeNew(EventCreateRequest $request)
+    {
+        try {
+            $startDateTime = $request->event_date . ' ' . $request->start_time . ':00';
+
+            if ($request->schedule === '1') {
+                // Recurring: end_date = series end date at end of day
+                $endDateTime = $request->series_end_date . ' 23:59:59';
+            } else {
+                // One-time: end_date = start + duration minutes
+                $endDateTime = date('Y-m-d H:i:s', strtotime($startDateTime) + ((int) $request->duration * 60));
+            }
+
+            $event = new Events;
+            $event->church_id         = Auth::user()->church_id;
+            $event->select_type       = $request->select_type;
+            $event->title             = $request->title;
+            $event->description       = $request->description;
+            $event->repeats           = $request->schedule;
+            $event->freq              = $request->schedule === '1' ? $request->freq : null;
+            $event->freq_term         = $request->schedule === '1' ? $request->freq_term : null;
+            $event->days_of_week      = ($request->schedule === '1' && $request->freq_term === 'week')
+                                            ? array_map('intval', $request->input('days_of_week', []))
+                                            : null;
+            $event->duration_minutes  = (int) $request->duration;
+            $event->location          = $request->location;
+            $event->category          = $request->category;
+            $event->organised_by      = $request->organised_by;
+            $event->start_date        = $startDateTime;
+            $event->end_date          = $endDateTime;
+            $event->publish_to_web    = $request->boolean('publish_to_web', true);
+            $event->enable_gallery    = $request->boolean('enable_gallery', true);
+            $event->enable_attendance = $request->boolean('enable_attendance', false);
+            $event->created_by        = Auth::id();
+            $event->save();
+
+            $reminderDate = date('Y-m-d', strtotime('-2 days', strtotime($event->start_date)));
+            $this->sendToReminderEvent($event, $reminderDate, 'first');
+
+            if (env('MAIL_STATUS') === 'on') {
+                event(new CalendarEvent($event));
+            }
+
+            $data = ['church_id' => Auth::user()->church_id, 'message' => 'New Event created', 'type' => 'event'];
+            event(new PushEvent($data));
+
+            $array = ['church_id' => Auth::user()->church_id, 'details' => 'New Event created'];
+            event(new PushNotificationEvent($array));
+
+            $ip = $this->getRequestIP();
+            $this->doActivityLog(
+                $event, Auth::user(),
+                ['ip' => $ip, 'details' => $_SERVER['HTTP_USER_AGENT']],
+                LOGNAME_ADD_EVENT,
+                'Event Added: ' . $event->title
+            );
+
+            return redirect()->route('admin.events.index')
+                ->with('successmessage', 'Event "' . $event->title . '" created successfully.');
+        } catch (Exception $e) {
+            Log::error('EventsController@storeNew: ' . $e->getMessage());
+            return back()->withInput()->with('failmessage', 'Could not save event. Please try again.');
+        }
     }
 
     /**dd
@@ -85,12 +279,19 @@ class EventsController extends Controller
             $events->select_type    = $request->select_type;
             $events->title          = $request->title;
             $events->description    = $request->description;
-            $events->repeats        = $request->repeats;
-            $events->freq           = $request->freq;
-            $events->freq_term      = $request->freq_term;
-            $events->location       = $request->location;
+            $events->repeats         = $request->repeats;
+            $events->freq            = $request->freq;
+            $events->freq_term       = $request->freq_term;
+            $events->days_of_week    = ($request->repeats == 1 && $request->freq_term === 'week')
+                                           ? array_map('intval', $request->input('days_of_week', []))
+                                           : null;
+            $events->duration_minutes = $request->duration_minutes ? (int) $request->duration_minutes : null;
+            $events->location        = $request->location;
             $events->category       = $request->category;
-            $events->organised_by   = $request->organised_by;
+            $events->organised_by      = $request->organised_by;
+            $events->publish_to_web    = $request->boolean('publish_to_web', true);
+            $events->enable_gallery    = $request->boolean('enable_gallery', true);
+            $events->enable_attendance = $request->boolean('enable_attendance', false);
             $events->start_date     = date('Y-m-d H:i:s',strtotime($request->start_date));
             $events->end_date       = date('Y-m-d H:i:s',strtotime($request->end_date));
 
@@ -193,14 +394,21 @@ class EventsController extends Controller
                 $events->image = $events->image;
             }
 
-            $events->title       = $request->title;
-            $events->description = $request->description;
-            $events->repeats     = $request->repeats;
-            $events->freq        = $request->freq;
-            $events->freq_term   = $request->freq_term;
-            $events->location    = $request->location;
+            $events->title          = $request->title;
+            $events->description    = $request->description;
+            $events->repeats        = $request->repeats;
+            $events->freq           = $request->freq;
+            $events->freq_term      = $request->freq_term;
+            $events->days_of_week   = ($request->repeats == 1 && $request->freq_term === 'week')
+                                          ? array_map('intval', $request->input('days_of_week', []))
+                                          : null;
+            $events->duration_minutes = $request->duration_minutes ? (int) $request->duration_minutes : null;
+            $events->location       = $request->location;
             $events->category    = $request->category;
-            $events->organised_by= $request->organised_by;
+            $events->organised_by      = $request->organised_by;
+            $events->publish_to_web    = $request->boolean('publish_to_web', true);
+            $events->enable_gallery    = $request->boolean('enable_gallery', true);
+            $events->enable_attendance = $request->boolean('enable_attendance', false);
             $events->start_date  = date('Y-m-d H:i:s',strtotime($request->start_date));
             $events->end_date    = date('Y-m-d H:i:s',strtotime($request->end_date));
 
@@ -303,78 +511,180 @@ class EventsController extends Controller
         }
     }
 
-    /**
-     * @param $facility
-     * @param $asset
-     * @return string
-     */
     public function events()
     {
-
-        $events = Events::where('church_id',Auth::user()->church_id)->get();
-
-        $items = array();
+        $events = Events::where('church_id', Auth::user()->church_id)->get();
+        $items  = [];
 
         foreach ($events as $event) {
-
-            if ($event->repeats === 1) {
-                //create multiple entries for repeating events
-                //count days from start to end and repeat
-                if ($event->freq_term === 'day') {
-                    foreach ($this->getDailyTasks($event) as $s) {
-                        array_push($items, $s);
-                    }
-                }
-
-                if ($event->freq_term === 'week') {
-                    foreach ($this->getWeeklyTasks($event) as $s) {
-                        array_push($items, $s);
-                    }
-                }
-
-                if ($event->freq_term === 'month') {
-                    foreach ($this->getMonthlyTasks($event) as $s) {
-                        array_push($items, $s);
-                    }
-                }
-                if ($event->freq_term === 'year') {
-                    foreach ($this->getYearlyTasks($event) as $s) {
-                        array_push($items, $s);
-                    }
-                }
-
+            if ($event->repeats == 1) {
+                if ($event->freq_term === 'day')   $items = array_merge($items, $this->getDailyTasks($event));
+                if ($event->freq_term === 'week')  $items = array_merge($items, $this->getWeeklyTasks($event));
+                if ($event->freq_term === 'month') $items = array_merge($items, $this->getMonthlyTasks($event));
+                if ($event->freq_term === 'year')  $items = array_merge($items, $this->getYearlyTasks($event));
             } else {
-                foreach ($this->getDayTask($event) as $s) {
-                    array_push($items, $s);
-                }
+                $items = array_merge($items, $this->getDayTask($event));
             }
         }
 
-        return json_encode($items);
+        return response()->json($items);
+    }
+
+    private function buildCalendarItem(Events $event, \DateTime $start, \DateTime $end): array
+    {
+        return [
+            'id'    => $event->id,
+            'title' => $event->title,
+            'start' => $start->format('Y-m-d\TH:i:s'),
+            'end'   => $end->format('Y-m-d\TH:i:s'),
+            'allDay' => (bool) $event->allDay,
+        ];
+    }
+
+    private function getDayTask(Events $event): array
+    {
+        return [$this->buildCalendarItem(
+            $event,
+            new \DateTime($event->start_date),
+            new \DateTime($event->end_date)
+        )];
+    }
+
+    private function getDailyTasks(Events $event): array
+    {
+        $items    = [];
+        $freq     = max(1, (int) $event->freq);
+        $duration = max(1, (int) ($event->duration_minutes ?? 60));
+        $cursor   = new \DateTime($event->start_date);
+        $seriesEnd = new \DateTime($event->end_date);
+
+        while ($cursor <= $seriesEnd) {
+            $occEnd = (clone $cursor)->modify('+' . $duration . ' minutes');
+            $items[] = $this->buildCalendarItem($event, $cursor, $occEnd);
+            $cursor->modify('+' . $freq . ' days');
+        }
+
+        return $items;
+    }
+
+    private function getWeeklyTasks(Events $event): array
+    {
+        $items      = [];
+        $freq       = max(1, (int) $event->freq);
+        $duration   = max(1, (int) ($event->duration_minutes ?? 60));
+        $daysOfWeek = is_array($event->days_of_week) ? array_map('intval', $event->days_of_week) : [];
+
+        $startDt   = new \DateTime($event->start_date);
+        $seriesEnd = new \DateTime($event->end_date);
+
+        if (empty($daysOfWeek)) {
+            $daysOfWeek = [(int) $startDt->format('w')];
+        }
+
+        // Anchor to the Sunday of the week containing start_date
+        $anchor = clone $startDt;
+        $anchor->setTime(0, 0, 0);
+        $anchor->modify('-' . (int) $anchor->format('w') . ' days');
+
+        $weekIndex = 0;
+
+        while (true) {
+            $weekSunday = (clone $anchor)->modify('+' . ($weekIndex * 7) . ' days');
+            if ($weekSunday > $seriesEnd) break;
+
+            foreach ($daysOfWeek as $dayNum) {
+                $occ = (clone $weekSunday)->modify('+' . $dayNum . ' days');
+                $occ->setTime((int) $startDt->format('H'), (int) $startDt->format('i'), 0);
+
+                if ($occ < $startDt || $occ > $seriesEnd) continue;
+
+                $occEnd = (clone $occ)->modify('+' . $duration . ' minutes');
+                $items[] = $this->buildCalendarItem($event, $occ, $occEnd);
+            }
+
+            $weekIndex += $freq;
+        }
+
+        return $items;
+    }
+
+    private function getMonthlyTasks(Events $event): array
+    {
+        $items    = [];
+        $freq     = max(1, (int) $event->freq);
+        $duration = max(1, (int) ($event->duration_minutes ?? 60));
+        $cursor   = new \DateTime($event->start_date);
+        $seriesEnd = new \DateTime($event->end_date);
+
+        while ($cursor <= $seriesEnd) {
+            $occEnd = (clone $cursor)->modify('+' . $duration . ' minutes');
+            $items[] = $this->buildCalendarItem($event, $cursor, $occEnd);
+            $cursor->modify('+' . $freq . ' months');
+        }
+
+        return $items;
+    }
+
+    private function getYearlyTasks(Events $event): array
+    {
+        $items    = [];
+        $freq     = max(1, (int) $event->freq);
+        $duration = max(1, (int) ($event->duration_minutes ?? 60));
+        $cursor   = new \DateTime($event->start_date);
+        $seriesEnd = new \DateTime($event->end_date);
+
+        while ($cursor <= $seriesEnd) {
+            $occEnd = (clone $cursor)->modify('+' . $duration . ' minutes');
+            $items[] = $this->buildCalendarItem($event, $cursor, $occEnd);
+            $cursor->modify('+' . $freq . ' years');
+        }
+
+        return $items;
     }
 
     public function show($id)
     {
-        $event = Events::where('id',$id)->first();
-        if (!$event) {
-            abort(404);
-        }
-        if(Gate::allows('event',$event))
-        {
-            if(date('Y-m-d H:i:s',strtotime($event->start_date)) <= date('Y-m-d H:i:s'))
-            {
-                $expired = true;
+        $event = Events::where('id', $id)->first();
+        if (!$event) abort(404);
+
+        if (Gate::allows('event', $event)) {
+            $expired = date('Y-m-d H:i:s', strtotime($event->start_date)) <= date('Y-m-d H:i:s');
+
+            $photos = EventGallery::where([
+                ['event_id', $id],
+                ['church_id', Auth::user()->church_id],
+            ])->orderBy('created_at', 'desc')->get();
+
+            $notes = \App\Models\Notes::where([
+                ['entity_id', $id],
+                ['entity_name', 'event'],
+            ])->orderBy('created_at', 'desc')->get();
+
+            $attended    = collect();
+            $notAttended = collect();
+            if ($expired) {
+                $base = [
+                    ['church_id', $event->church_id],
+                    ['title',     $event->title],
+                    ['category',  $event->category],
+                    ['date',      date('Y-m-d H:i:s', strtotime($event->start_date))],
+                ];
+                $attended    = Attendance::where(array_merge($base, [['is_present', 1]]))->get();
+                $notAttended = Attendance::where(array_merge($base, [['is_present', 0]]))->get();
             }
-            else
-            {
-                $expired = false;
+
+            $sessions = collect();
+            if ($event->enable_attendance) {
+                $sessions = \App\Models\EventAttendanceSession::where('event_id', $id)
+                    ->withCount('attendees')
+                    ->orderByDesc('attendance_date')
+                    ->get();
             }
-            return view('admin.events.show',['event'=>$event , 'expired' => $expired]);
+
+            return view('admin.events.show', compact('event', 'expired', 'photos', 'notes', 'attended', 'notAttended', 'sessions'));
         }
-        else
-        {
-            abort(403);
-        }
+
+        abort(403);
     }
 
     public function showdetails($id)

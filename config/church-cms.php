@@ -192,3 +192,11 @@ defined('LOGNAME_EDIT_POST_CATEGORY') or define('LOGNAME_EDIT_POST_CATEGORY','ed
 defined('LOGNAME_DELETE_POST_CATEGORY') or define('LOGNAME_DELETE_POST_CATEGORY','delete_post_category');
 defined('LOGNAME_PRINT_MEMBERSHIP_CARD') or define('LOGNAME_PRINT_MEMBERSHIP_CARD','printmembershipcard');
 defined('LOGNAME_PRINT_MEMBERSHIP_CARD_FOR_ALL') or define('LOGNAME_PRINT_MEMBERSHIP_CARD_FOR_ALL','printmembershipcardforall');
+
+//attendance
+defined('LOGNAME_OPEN_ATTENDANCE_SESSION') or define('LOGNAME_OPEN_ATTENDANCE_SESSION','open_attendance_session');
+defined('LOGNAME_LOCK_ATTENDANCE_SESSION') or define('LOGNAME_LOCK_ATTENDANCE_SESSION','lock_attendance_session');
+defined('LOGNAME_UNLOCK_ATTENDANCE_SESSION') or define('LOGNAME_UNLOCK_ATTENDANCE_SESSION','unlock_attendance_session');
+defined('LOGNAME_EXPORT_ATTENDANCE') or define('LOGNAME_EXPORT_ATTENDANCE','export_attendance');
+defined('LOGNAME_ASSIGN_EVENT_MANAGER') or define('LOGNAME_ASSIGN_EVENT_MANAGER','assign_event_manager');
+defined('LOGNAME_REMOVE_EVENT_MANAGER') or define('LOGNAME_REMOVE_EVENT_MANAGER','remove_event_manager');

@@ -196,15 +196,15 @@ trait Common {
 
         try {
             if ($category == 'prayer') {
-                $image = \Storage::url('uploads/images/prayer.jpg');
+                $image = url('/uploads/Images/prayer.jpg');
             } elseif ($category == 'culturals') {
-                $image = \Storage::url('uploads/images/culturals.jpg');
+                $image = url('/uploads/Images/culturals.jpg');
             } elseif ($category == 'meeting') {
-                $image = \Storage::url('uploads/images/meeting.jpg');
+                $image = url('/uploads/Images/meeting.jpg');
             } elseif ($category == 'education') {
-                $image = \Storage::url('uploads/images/education.jpg');
+                $image = url('/uploads/Images/education.jpg');
             } elseif ($category == 'sermon') {
-                $image = \Storage::url('uploads/images/sermon.jpg');
+                $image = url('/uploads/Images/sermon.jpg');
             }
 
             return $image;

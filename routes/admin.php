@@ -531,14 +531,18 @@ use Illuminate\Support\Facades\Route;
 
     //recurring events
     Route::group(['middleware' => ['permission:read-events']], function() {
-        Route::get('/events', 'EventsController@index');
+        Route::get('/events', 'EventsController@index')->name('admin.events.index');
+    Route::get('/events/new', 'EventsController@newForm')->name('admin.events.new');
+    Route::post('/events/new', 'EventsController@storeNew')->name('admin.events.storeNew');
     Route::get('/events/show', 'EventsController@events');
     Route::post('/events/create', 'EventsController@store');
     Route::post('/events/update/{id}', 'EventsController@update');
     Route::post('/events/changeevent/{id}', 'EventsController@changeevent');
     Route::post('/events/validateedit/{id}', 'EventsController@validateedit');
     Route::get('/events/edit/{id}', 'EventsController@edit');
-    Route::get('/events/show/details/{id}', 'EventsController@show');
+    Route::get('/events/{id}/edit', 'EventsController@editForm')->name('admin.events.editForm');
+    Route::post('/events/{id}/edit', 'EventsController@storeEdit')->name('admin.events.storeEdit');
+    Route::get('/events/show/details/{id}', 'EventsController@show')->name('admin.events.show');
     Route::get('/events/showdetails/{id}', 'EventsController@showdetails');
     Route::get('/events/details/{id}','EventsController@details');
     Route::delete('/events/delete/{id}','EventsController@destroy');
@@ -853,7 +857,7 @@ use Illuminate\Support\Facades\Route;
         Route::post('/help/update/{id}',      'HelpsController@update');
     });
 
-    //attendance
+    //attendance (legacy import)
     Route::group(['middleware' => ['permission:read-members']], function() {
         Route::get('/meetings','AttendancesController@Create');
     Route::post('/meetings/importSummary','AttendancesController@store');
@@ -861,8 +865,29 @@ use Illuminate\Support\Facades\Route;
 
 
     Route::get('/event/{event_id}/downloadSummary','AttendancesController@summary');
-    Route::get('/event/{event_id}/attendance','AttendancesController@createAttendance');
-    Route::post('/event/{event_id}/attendance','AttendancesController@saveAttendance');
+    Route::post('/event/{event_id}/attendanceImport','AttendancesController@createAttendance');
+    Route::post('/event/{event_id}/attendanceImportSave','AttendancesController@saveAttendance');
+    });
+
+    //attendance (QR-based check-in)
+    Route::group(['middleware' => ['permission:read-attendance']], function() {
+        Route::get('/event/{event_id}/attendance-sessions',         'EventAttendanceController@sessions')->name('admin.attendance.sessions');
+        Route::get('/attendance/session/{id}',                      'EventAttendanceController@showSession')->name('admin.attendance.session');
+        Route::get('/attendance/session/{id}/export',               'EventAttendanceController@export')->name('admin.attendance.export');
+    });
+    Route::group(['middleware' => ['permission:create-attendance']], function() {
+        Route::post('/event/{event_id}/attendance-sessions/open',   'EventAttendanceController@openSession')->name('admin.attendance.open');
+        Route::get('/attendance/session/{id}/checkin',              'EventAttendanceController@checkin')->name('admin.attendance.checkin');
+        Route::get('/attendance/session/{id}/search',               'EventAttendanceController@searchMember')->name('admin.attendance.search');
+        Route::post('/attendance/session/{id}/checkin',             'EventAttendanceController@markAttendee')->name('admin.attendance.mark');
+        Route::delete('/attendance/session/{id}/attendee/{uid}',    'EventAttendanceController@removeAttendee')->name('admin.attendance.remove');
+    });
+    Route::group(['middleware' => ['permission:update-attendance']], function() {
+        Route::post('/attendance/session/{id}/lock',                'EventAttendanceController@lock')->name('admin.attendance.lock');
+        Route::post('/attendance/session/{id}/unlock',              'EventAttendanceController@unlock')->name('admin.attendance.unlock');
+        Route::get('/event/{event_id}/managers',                    'EventAttendanceController@manageManagers')->name('admin.event.managers');
+        Route::post('/event/{event_id}/managers',                   'EventAttendanceController@storeManager')->name('admin.event.managers.store');
+        Route::delete('/event/{event_id}/managers/{uid}',           'EventAttendanceController@removeManager')->name('admin.event.managers.remove');
     });
 
 

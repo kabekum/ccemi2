@@ -114,6 +114,13 @@ Route::group([
 
 	Route::get('/events/gallery/show/{event_id}', 'EventGalleryController@showimage');
 
+	//attendance (QR-based check-in)
+	Route::get('/attendance/events',               'AttendanceController@myEvents');
+	Route::post('/attendance/session',             'AttendanceController@openSession');
+	Route::post('/attendance/scan',                'AttendanceController@scan');
+	Route::post('/attendance/session/{id}/lock',   'AttendanceController@lock');
+	Route::get('/attendance/session/{id}',         'AttendanceController@sessionReport');
+
 	//gallery
 
 	Route::get('/gallery/show/{church_id}', 'GalleryController@showdetails');
