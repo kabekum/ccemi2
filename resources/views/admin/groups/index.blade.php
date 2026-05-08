@@ -1,13 +1,16 @@
 @extends('layouts.admin.layout')
 
 @section('content')
+@php
+$isAdmin = auth()->user()->usergroup_id == 3;
+@endphp
 
 {{-- Page header --}}
 <div class="flex items-center justify-between my-3">
     <h1 class="admin-h1">Groups ({{ $count }})</h1>
     @if($isAdmin || Auth::user()->hasPermission('create-groups'))
     <a href="{{ url('/admin/group/create') }}"
-       class="text-sm rounded px-3 py-1.5 flex items-center gap-2 btn btn-primary submit-btn">
+        class="text-sm rounded px-3 py-1.5 flex items-center gap-2 btn btn-primary submit-btn">
         <i class="fas fa-plus text-xs"></i>
         <span>Create Group</span>
     </a>
@@ -22,26 +25,26 @@
     <form method="GET" action="{{ url('/admin/groups') }}" class="flex items-center gap-2 mb-4">
         <div class="relative flex-1 max-w-xs">
             <input type="text" name="search"
-                   value="{{ request('search') }}"
-                   placeholder="Search by name or description…"
-                   class="tw-form-control w-full pr-8 text-sm">
+                value="{{ request('search') }}"
+                placeholder="Search by name or description…"
+                class="tw-form-control w-full pr-8 text-sm">
             <button type="submit" class="absolute inset-y-0 right-2 flex items-center text-gray-400 hover:text-gray-600">
                 <i class="fas fa-search text-xs"></i>
             </button>
         </div>
         @if(request('search'))
         <a href="{{ url('/admin/groups') }}"
-           class="text-sm border bg-gray-100 text-gray-600 py-1.5 px-3 rounded hover:bg-gray-200 transition">
+            class="text-sm border bg-gray-100 text-gray-600 py-1.5 px-3 rounded hover:bg-gray-200 transition">
             Reset
         </a>
         @endif
     </form>
 
     @if($groups->isEmpty())
-        <div class="text-center py-16 text-gray-400">
-            <i class="fas fa-users text-4xl mb-3 block"></i>
-            <p class="text-sm">No groups yet.</p>
-        </div>
+    <div class="text-center py-16 text-gray-400">
+        <i class="fas fa-users text-4xl mb-3 block"></i>
+        <p class="text-sm">No groups yet.</p>
+    </div>
     @else
     <div class="overflow-x-auto">
         <table class="w-full text-sm">
@@ -62,13 +65,13 @@
                     {{-- Cover thumbnail --}}
                     <td class="px-4 py-3">
                         <img src="{{ $group->CoverImagePath }}" alt="{{ $group->name }}"
-                             class="w-10 h-10 rounded object-cover flex-shrink-0">
+                            class="w-10 h-10 rounded object-cover flex-shrink-0">
                     </td>
 
                     {{-- Name --}}
                     <td class="px-4 py-3">
                         <a href="{{ url('/admin/group/show/' . $group->id) }}"
-                           class="font-medium text-gray-800 hover:text-blue-600 transition capitalize">
+                            class="font-medium text-gray-800 hover:text-blue-600 transition capitalize">
                             {{ $group->name }}
                         </a>
                     </td>
@@ -98,19 +101,19 @@
                     <td class="px-4 py-3 text-right">
                         <div class="flex items-center justify-end gap-2">
                             <a href="{{ url('/admin/group/show/' . $group->id) }}"
-                               class="text-xs px-2.5 py-1.5 rounded border border-gray-200 text-gray-600 hover:bg-gray-100 transition">
+                                class="text-xs px-2.5 py-1.5 rounded border border-gray-200 text-gray-600 hover:bg-gray-100 transition">
                                 View
                             </a>
                             @if($isAdmin || Auth::user()->hasPermission('create-groups'))
                             <a href="{{ url('/admin/group/edit/' . $group->id) }}"
-                               class="text-xs px-2.5 py-1.5 rounded border border-gray-200 text-gray-600 hover:bg-gray-100 transition">
+                                class="text-xs px-2.5 py-1.5 rounded border border-gray-200 text-gray-600 hover:bg-gray-100 transition">
                                 Edit
                             </a>
                             <form action="{{ url('/admin/group/delete/' . $group->id) }}" method="POST"
-                                  onsubmit="return confirm('Delete this group?')">
+                                onsubmit="return confirm('Delete this group?')">
                                 @csrf @method('DELETE')
                                 <button type="submit"
-                                        class="text-xs px-2.5 py-1.5 rounded border border-red-200 text-red-500 hover:bg-red-50 transition">
+                                    class="text-xs px-2.5 py-1.5 rounded border border-red-200 text-red-500 hover:bg-red-50 transition">
                                     Delete
                                 </button>
                             </form>

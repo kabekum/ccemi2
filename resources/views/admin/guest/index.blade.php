@@ -2,8 +2,9 @@
 
 @section('content')
 @php
-    $hasFilters = $firstname || $lastname || $gender || $minAge || $maxAge || $dob || $profession || $mobile || $email || $location;
-    $exportUrl  = url('/admin/exportGuests') . '?' . http_build_query(array_merge(request()->all(), ['usergroup_id' => 5]));
+$hasFilters = $firstname || $lastname || $gender || $minAge || $maxAge || $dob || $profession || $mobile || $email || $location;
+$exportUrl = url('/admin/exportGuests') . '?' . http_build_query(array_merge(request()->all(), ['usergroup_id' => 5]));
+$isAdmin = auth()->user()->usergroup_id == 3;
 @endphp
 
 {{-- ── Header ─────────────────────────────────────────────────────────── --}}
@@ -12,13 +13,13 @@
     <div class="flex items-center gap-2">
         @if($isAdmin || Auth::user()->hasPermission('create-members'))
         <a href="{{ url('/admin/guest/add') }}"
-           class="text-sm rounded px-3 py-1.5 flex items-center gap-2 btn btn-primary submit-btn">
+            class="text-sm rounded px-3 py-1.5 flex items-center gap-2 btn btn-primary submit-btn">
             <i class="fas fa-user-plus text-xs"></i>
             Add Guest
         </a>
         @endif
         <a href="{{ $exportUrl }}"
-           class="text-sm rounded px-3 py-1.5 flex items-center gap-2 border border-gray-300 text-gray-600 hover:bg-gray-50 transition">
+            class="text-sm rounded px-3 py-1.5 flex items-center gap-2 border border-gray-300 text-gray-600 hover:bg-gray-50 transition">
             <i class="fas fa-download text-xs"></i>
             Export
         </a>
@@ -32,13 +33,13 @@
     {{-- ── Alphabet pills ──────────────────────────────────────────────── --}}
     <div class="flex flex-wrap gap-1 mb-4">
         <a href="{{ url('/admin/guests') }}"
-           class="px-2.5 py-1 text-xs rounded border font-medium transition
+            class="px-2.5 py-1 text-xs rounded border font-medium transition
                   {{ !$alphabet ? 'border-blue-600 text-blue-600 bg-blue-50' : 'border-gray-200 text-gray-500 hover:border-gray-300 hover:text-gray-700' }}">
             All
         </a>
         @foreach(range('A', 'Z') as $letter)
         <a href="{{ url('/admin/guests') . '?alphabet=' . $letter }}"
-           class="px-2.5 py-1 text-xs rounded border font-medium transition
+            class="px-2.5 py-1 text-xs rounded border font-medium transition
                   {{ $alphabet === $letter ? 'border-blue-600 text-blue-600 bg-blue-50' : 'border-gray-200 text-gray-500 hover:border-gray-300 hover:text-gray-700' }}">
             {{ $letter }}
         </a>
@@ -48,7 +49,7 @@
     {{-- ── Filter toggle + form ────────────────────────────────────────── --}}
     <div class="mb-5">
         <button type="button" id="guest-filter-toggle"
-                class="text-sm flex items-center gap-1.5 px-3 py-1.5 rounded border transition
+            class="text-sm flex items-center gap-1.5 px-3 py-1.5 rounded border transition
                        {{ $hasFilters ? 'border-blue-400 text-blue-600 bg-blue-50' : 'border-gray-200 text-gray-600 hover:bg-gray-50' }}">
             <i class="fas fa-filter text-xs"></i>
             Filters
@@ -64,12 +65,12 @@
                     <div>
                         <label class="block text-xs font-medium text-gray-500 mb-1">First Name</label>
                         <input type="text" name="firstname" value="{{ $firstname }}"
-                               class="tw-form-control text-sm py-1.5">
+                            class="tw-form-control text-sm py-1.5">
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-gray-500 mb-1">Last Name</label>
                         <input type="text" name="lastname" value="{{ $lastname }}"
-                               class="tw-form-control text-sm py-1.5">
+                            class="tw-form-control text-sm py-1.5">
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-gray-500 mb-1">Gender</label>
@@ -101,36 +102,36 @@
                     <div>
                         <label class="block text-xs font-medium text-gray-500 mb-1">Min Age</label>
                         <input type="number" name="min_age" value="{{ $minAge }}" min="0" max="120"
-                               class="tw-form-control text-sm py-1.5">
+                            class="tw-form-control text-sm py-1.5">
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-gray-500 mb-1">Max Age</label>
                         <input type="number" name="max_age" value="{{ $maxAge }}" min="0" max="120"
-                               class="tw-form-control text-sm py-1.5">
+                            class="tw-form-control text-sm py-1.5">
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-gray-500 mb-1">Mobile</label>
                         <input type="text" name="mobile_no" value="{{ $mobile }}"
-                               class="tw-form-control text-sm py-1.5">
+                            class="tw-form-control text-sm py-1.5">
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-gray-500 mb-1">Email</label>
                         <input type="text" name="email" value="{{ $email }}"
-                               class="tw-form-control text-sm py-1.5">
+                            class="tw-form-control text-sm py-1.5">
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-gray-500 mb-1">Location</label>
                         <input type="text" name="location" value="{{ $location }}"
-                               class="tw-form-control text-sm py-1.5">
+                            class="tw-form-control text-sm py-1.5">
                     </div>
                 </div>
                 <div class="mt-3 flex gap-2">
                     <button type="submit"
-                            class="text-sm px-4 py-1.5 rounded btn btn-primary submit-btn">
+                        class="text-sm px-4 py-1.5 rounded btn btn-primary submit-btn">
                         Search
                     </button>
                     <a href="{{ url('/admin/guests') }}"
-                       class="text-sm px-4 py-1.5 rounded border border-gray-300 text-gray-600 hover:bg-gray-50 transition">
+                        class="text-sm px-4 py-1.5 rounded border border-gray-300 text-gray-600 hover:bg-gray-50 transition">
                         Reset
                     </a>
                 </div>
@@ -166,18 +167,18 @@
             <tbody class="divide-y divide-gray-100">
                 @foreach($guests as $guest)
                 @php
-                    $profile  = $guest->userprofile;
-                    $fullName = $profile ? trim($profile->firstname . ' ' . $profile->lastname) : $guest->name;
-                    $initials = $profile
-                        ? strtoupper(substr($profile->firstname ?? '', 0, 1) . substr($profile->lastname ?? '', 0, 1))
-                        : strtoupper(substr($guest->name, 0, 2));
-                    $status   = $profile->status ?? 'active';
+                $profile = $guest->userprofile;
+                $fullName = $profile ? trim($profile->firstname . ' ' . $profile->lastname) : $guest->name;
+                $initials = $profile
+                ? strtoupper(substr($profile->firstname ?? '', 0, 1) . substr($profile->lastname ?? '', 0, 1))
+                : strtoupper(substr($guest->name, 0, 2));
+                $status = $profile->status ?? 'active';
                 @endphp
                 <tr class="hover:bg-gray-50 transition">
                     <td class="px-4 py-3">
                         @if($profile && $profile->AvatarPath)
                         <img src="{{ $profile->AvatarPath }}" alt="{{ $fullName }}"
-                             class="w-9 h-9 rounded-full object-cover">
+                            class="w-9 h-9 rounded-full object-cover">
                         @else
                         <div class="w-9 h-9 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-semibold">
                             {{ $initials ?: '?' }}
@@ -186,7 +187,7 @@
                     </td>
                     <td class="px-4 py-3 font-medium text-gray-800">
                         <a href="{{ url('/admin/guest/show/' . $guest->name) }}"
-                           class="hover:text-blue-600 transition">{{ $fullName }}</a>
+                            class="hover:text-blue-600 transition">{{ $fullName }}</a>
                     </td>
                     <td class="px-4 py-3 text-gray-500">{{ $guest->mobile_no ?: '—' }}</td>
                     <td class="px-4 py-3 text-gray-500 truncate max-w-xs">{{ $guest->email ?: '—' }}</td>
@@ -203,19 +204,19 @@
                     <td class="px-4 py-3">
                         <div class="flex items-center justify-end gap-2">
                             <a href="{{ url('/admin/guest/show/' . $guest->name) }}"
-                               class="text-xs px-2.5 py-1.5 rounded border border-gray-200 text-gray-600 hover:bg-gray-100 transition">
+                                class="text-xs px-2.5 py-1.5 rounded border border-gray-200 text-gray-600 hover:bg-gray-100 transition">
                                 View
                             </a>
                             @if($isAdmin || Auth::user()->hasPermission('create-members'))
                             <a href="{{ url('/admin/guest/edit/' . $guest->name) }}"
-                               class="text-xs px-2.5 py-1.5 rounded border border-gray-200 text-gray-600 hover:bg-gray-100 transition">
+                                class="text-xs px-2.5 py-1.5 rounded border border-gray-200 text-gray-600 hover:bg-gray-100 transition">
                                 Edit
                             </a>
                             <form action="{{ url('/admin/guest/delete/' . $guest->name) }}" method="POST"
-                                  onsubmit="return confirm('Delete this guest?')">
+                                onsubmit="return confirm('Delete this guest?')">
                                 @csrf @method('DELETE')
                                 <button type="submit"
-                                        class="text-xs px-2.5 py-1.5 rounded border border-red-200 text-red-500 hover:bg-red-50 transition">
+                                    class="text-xs px-2.5 py-1.5 rounded border border-red-200 text-red-500 hover:bg-red-50 transition">
                                     Delete
                                 </button>
                             </form>
@@ -240,14 +241,14 @@
 
 @push('scripts')
 <script>
-(function () {
-    var toggle = document.getElementById('guest-filter-toggle');
-    var panel  = document.getElementById('guest-filter-panel');
-    if (toggle && panel) {
-        toggle.addEventListener('click', function () {
-            panel.classList.toggle('hidden');
-        });
-    }
-})();
+    (function() {
+        var toggle = document.getElementById('guest-filter-toggle');
+        var panel = document.getElementById('guest-filter-panel');
+        if (toggle && panel) {
+            toggle.addEventListener('click', function() {
+                panel.classList.toggle('hidden');
+            });
+        }
+    })();
 </script>
 @endpush
