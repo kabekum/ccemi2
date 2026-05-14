@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use App\Traits\RegisterUser;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use App\Helpers\SiteHelper;
 use App\Traits\LogActivity;
 use App\Models\Userprofile;
@@ -45,15 +46,23 @@ class MemberAddController extends Controller
      */
     public function create()
     {
-        //
-        $ref_name = request('ref_name')?request('ref_name'):'';
+        $ref_name = request('ref_name') ? request('ref_name') : '';
         $count    = User::ByRole(5)->ByChurch(Auth::user()->church_id)->count();
-        
+
         $membership_start_date = Carbon::now()->format('Y-m-d');
 
+        $countrylist       = SiteHelper::getCountries();
+        $occupationlist    = SiteHelper::getOccupationList();
+        $maritalstatuslist = SiteHelper::getMaritalStatusList();
+        $relationlist      = SiteHelper::getRelationList();
 
-        return view('/admin/member/create',['ref_name' => $ref_name , 'membership_start_date' => $membership_start_date  ,'count' => $count ]);
-        //  'membership_end_date'=>$membership_end_date
+        $tempAvatar = session('temp_avatar');
+
+        return view('/admin/member/create', compact(
+            'ref_name', 'membership_start_date', 'count',
+            'countrylist', 'occupationlist', 'maritalstatuslist', 'relationlist',
+            'tempAvatar'
+        ));
     }
 
     /**
@@ -100,13 +109,22 @@ class MemberAddController extends Controller
             $church_id = Auth::user()->church_id;
 
             $file = $request->file('avatar');
-            if($file)
-            {
+            if ($file) {
                 $folder = $church_id.'/member/avatar';
-                $path   = $this->uploadFile($folder,$file);
-            }
-            else
-            {
+                $path   = $this->uploadFile($folder, $file);
+                if (session('temp_avatar')) {
+                    Storage::disk('public')->delete(session('temp_avatar'));
+                    session()->forget('temp_avatar');
+                }
+            } elseif (session('temp_avatar')) {
+                $tempPath = session('temp_avatar');
+                $ext      = pathinfo($tempPath, PATHINFO_EXTENSION);
+                $newPath  = $church_id.'/member/avatar/'.uniqid().'.'.$ext;
+                Storage::disk('public')->copy($tempPath, $newPath);
+                Storage::disk('public')->delete($tempPath);
+                session()->forget('temp_avatar');
+                $path = $newPath;
+            } else {
                 $path = '';
             }
 

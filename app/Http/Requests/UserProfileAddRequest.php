@@ -4,6 +4,9 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Contracts\Validation\Validator as ValidatorContract;
+use Illuminate\Validation\ValidationException;
 use App\Models\Userprofile;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -167,7 +170,7 @@ class UserProfileAddRequest extends FormRequest
                 'marriage_status'   =>'required',
                 'aadhar_number'     =>'nullable|numeric|digits:12|check_unique_aadhar_number',
                 'notes'             =>'nullable|string|checknotes',
-                'avatar'            =>'required|mimes:jpg,jpeg,png,webp',
+                'avatar'            => (session('temp_avatar') ? 'nullable' : 'required').'|mimes:jpg,jpeg,png,webp',
         ];
 
         if(request('ref_name')!="")
@@ -201,6 +204,18 @@ class UserProfileAddRequest extends FormRequest
         }
 
         return $rules;
+    }
+
+    protected function failedValidation(ValidatorContract $validator)
+    {
+        if ($this->hasFile('avatar') && $this->file('avatar')->isValid()) {
+            if (session('temp_avatar')) {
+                Storage::disk('public')->delete(session('temp_avatar'));
+            }
+            $tempPath = $this->file('avatar')->store('temp_avatars', 'public');
+            session(['temp_avatar' => $tempPath]);
+        }
+        parent::failedValidation($validator);
     }
 
     public function messages()
