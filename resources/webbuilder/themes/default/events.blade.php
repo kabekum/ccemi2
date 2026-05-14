@@ -62,30 +62,7 @@
 
         @if(count($completed))
 
-        {{-- Build a flat JS object: { "2026::April": [...], ... } for Alpine --}}
-        <script>
-            window.__completedEvents = {
-                @foreach($completed as $year => $months)
-                @foreach($months as $month => $events)
-                "{{ $year }}::{{ $month }}": [
-                    @foreach($events as $event) {
-                        id: {
-                            {
-                                $event - > id
-                            }
-                        },
-                        title: @json($event - > title),
-                        location: @json($event - > location),
-                        image: @json($event - > image ? \Storage::disk('public') - > url($event - > image) : null),
-                        date: "{{ \Carbon\Carbon::parse($event->start_date)->format('d M Y, g:i A') }}"
-                    },
-                    @endforeach
-                ],
-                @endforeach
-                @endforeach
-            };
-            window.__eventRouteBase = "{{ url('/event') }}";
-        </script>
+
 
         <div x-data="{
                 openYear: '{{ array_key_first($completed) }}',
