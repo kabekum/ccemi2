@@ -141,7 +141,7 @@ class UserController extends Controller
         }
 
         // Paginate results (15 per page)
-        $usersPaginated = $usersQuery->paginate(15);
+        $usersPaginated = $usersQuery->orderBy('id', 'DESC')->paginate(15);
 
         // Convert to resource collection
         $membersData = \App\Http\Resources\User::collection($usersPaginated->getCollection());
