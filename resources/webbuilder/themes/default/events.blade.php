@@ -21,6 +21,14 @@
         </h2>
         @php
         use Illuminate\Support\Str;
+
+        if(Str::startsWith($event->image, ['http://', 'https://'])){
+
+        $image=$event->image;
+
+        }else{
+        $image=\Storage::url($event->image);
+        }
         @endphp
 
         @if($upcoming->count())
@@ -34,11 +42,9 @@
                 @endif
 
 
-                @if($event->image)
+                @if($image)
                 <img
-                    src="{{ \Str::startsWith($event->image, ['http://', 'https://']) 
-            ? $event->image 
-            : \Storage::url($event->image) }}"
+                    src="{{ $image}}"
                     alt="{{ $event->title }}"
                     class="w-full h-44 object-cover">
                 @else
