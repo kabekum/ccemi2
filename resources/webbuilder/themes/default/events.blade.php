@@ -19,17 +19,6 @@
             <span class="inline-block w-3 h-3 rounded-full bg-green-500"></span>
             Upcoming Events
         </h2>
-        @php
-        use Illuminate\Support\Str;
-
-        if(Str::startsWith($event->image, ['http://', 'https://'])){
-
-        $image=$event->image;
-
-        }else{
-        $image=\Storage::url($event->image);
-        }
-        @endphp
 
         @if($upcoming->count())
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -40,17 +29,6 @@
                 @else
                 <div class="w-full h-44 bg-green-50 flex items-center justify-center text-green-300 text-5xl">&#128197;</div>
                 @endif
-
-
-                @if($image)
-                <img
-                    src="{{ $image}}"
-                    alt="{{ $event->title }}"
-                    class="w-full h-44 object-cover">
-                @else
-                <div class="w-full h-44 bg-green-50 flex items-center justify-center text-green-300 text-5xl">&#128197;</div>
-                @endif
-
                 <div class="p-4">
                     @if($event->category)
                     <span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">{{ $event->category }}</span>
