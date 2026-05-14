@@ -11,10 +11,6 @@
     @endphp
 
     @if($event->image)
-    <img src="{{ \Storage::disk('public')->url($event->image) }}" alt="{{ $event->title }}" class="w-full h-64 object-cover rounded-lg mb-8">
-    @endif
-
-    @if($event->image)
     <img
         src="{{ Str::startsWith($event->image, ['http://', 'https://']) 
             ? $event->image 
