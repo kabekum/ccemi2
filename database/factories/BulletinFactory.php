@@ -16,9 +16,22 @@ $factory->define(App\Models\Bulletin::class, function (Faker $faker) {
         $name  = "Monthly Bulletin – " . \Carbon\Carbon::create($year, $month)->format('F Y');
     }
 
+    $paths = [
+        'uploads/Images/Bulletins/bullet.jpg',
+        'uploads/Images/Bulletins/bullet1.jpg',
+        'uploads/Images/Bulletins/bullet2.jpg',
+        'uploads/Images/Bulletins/bullet3.jpg',
+        'uploads/Images/Bulletins/bullet4.jpg',
+        'uploads/Images/Bulletins/bullet5.jpg',
+    ];
+
+
+
+    $randomCoverImage = $paths[array_rand($paths)];
+
     return [
         'name'        => $name,
-        'cover_image' => 'uploads/bulletins/cover_' . $faker->lexify('??????') . '.jpg',
+        'cover_image' => url($randomCoverImage),
         'type'        => $type,
         'week'        => $week,
         'month'       => $month,
