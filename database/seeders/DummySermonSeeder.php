@@ -25,11 +25,11 @@ class DummySermonSeeder extends Seeder
 
             if (! $author) continue;
 
-            factory(Sermon::class, 3)->create([
+            Sermon::factory()->count(3)->create([
                 'church_id' => $church->id,
                 'user_id'   => $author->id,
             ])->each(function ($sermon) use ($author) {
-                factory(SermonLink::class, 5)->create([
+                SermonLink::factory()->count(5)->create([
                     'church_id'  => $author->church_id,
                     'user_id'    => $author->id,
                     'sermons_id' => $sermon->id,

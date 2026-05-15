@@ -21,13 +21,13 @@ class DummyUpcomingEventsSeeder extends Seeder
         {
             $churchadmin = User::where([['church_id',$church->id],['usergroup_id',3]])->first();
             
-            factory(Events::class, 5)->create([
+            Events::factory()->count(5)->create([
                 'church_id'     =>  $church->id,
                 'start_date'    => Carbon::now()->addDay(2),
                 'end_date'      => Carbon::now()->addDay(3),
             ])->each(function($churchadmin){
 
-                factory(EventGallery::class, 20)->create([
+                EventGallery::factory()->count(20)->create([
                     'event_id'      =>  $churchadmin->id, 
                     'church_id'     =>  $churchadmin->church_id,
                     'created_by'    =>  $churchadmin->id, 

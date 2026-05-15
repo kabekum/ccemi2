@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use App\Models\Bulletin;
 use App\Models\Church;
 
 class DummyBulletinsSeeder extends Seeder
@@ -17,7 +18,7 @@ class DummyBulletinsSeeder extends Seeder
         $churches = Church::where('status', 1)->get();
 
         foreach ($churches as $church) {
-            factory(\App\Models\Bulletin::class, 6)->create([
+            Bulletin::factory()->count(6)->create([
                 'church_id' => $church->id,
             ]);
         }

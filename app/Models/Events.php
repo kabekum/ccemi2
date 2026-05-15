@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Traits\Common;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
  * Events Model
@@ -44,13 +45,14 @@ class Events extends Model
     //
     use SoftDeletes;
     use Common;
+    use HasFactory;
 
     /**
      * The table associated with the model.
      *
      * @var string
      */
-	protected $table = 'events';
+    protected $table = 'events';
 
     /**
      * The attributes that are mass assignable.
@@ -58,11 +60,29 @@ class Events extends Model
      * @var array
      */
     protected $fillable = [
-        'church_id', 'select_type', 'title', 'description', 'repeats', 'freq', 'freq_term',
-        'days_of_week', 'duration_minutes',
-        'location', 'category', 'organised_by', 'image', 'start_date', 'end_date', 'allDay',
-        'created_by', 'updated_by', 'publish_to_web', 'enable_gallery', 'enable_attendance',
-        'attendance_scope', 'attendance_group_id',
+        'church_id',
+        'select_type',
+        'title',
+        'description',
+        'repeats',
+        'freq',
+        'freq_term',
+        'days_of_week',
+        'duration_minutes',
+        'location',
+        'category',
+        'organised_by',
+        'image',
+        'start_date',
+        'end_date',
+        'allDay',
+        'created_by',
+        'updated_by',
+        'publish_to_web',
+        'enable_gallery',
+        'enable_attendance',
+        'attendance_scope',
+        'attendance_group_id',
     ];
 
     protected $casts = [
@@ -78,23 +98,23 @@ class Events extends Model
 
     public function church()
     {
-        return $this->belongsTo('App\Models\Church','church_id');
+        return $this->belongsTo('App\Models\Church', 'church_id');
     }
 
     public function notes()
     {
-        return $this->hasMany('App\Models\Notes','entity_id','id');
+        return $this->hasMany('App\Models\Notes', 'entity_id', 'id');
     }
 
-    public function scopeByChurch($query,$church_id)
+    public function scopeByChurch($query, $church_id)
     {
-        $query->where('church_id',$church_id);
+        $query->where('church_id', $church_id);
         return $query;
     }
 
     public function eventreminder()
     {
-        return $this->hasMany('App\Models\Reminder', 'entity_id','id')->where('entity_name','=','App\\Models\\Events');
+        return $this->hasMany('App\Models\Reminder', 'entity_id', 'id')->where('entity_name', '=', 'App\\Models\\Events');
     }
 
     public function gallery()
@@ -182,11 +202,20 @@ class Events extends Model
             while ($cursor->lt($from) && $iter < $maxIter) {
                 $iter++;
                 switch ($freqTerm) {
-                    case 'day':   $cursor->addDays($freq);   break;
-                    case 'week':  $cursor->addWeeks($freq);  break;
-                    case 'month': $cursor->addMonths($freq); break;
-                    case 'year':  $cursor->addYears($freq);  break;
-                    default:      return [];
+                    case 'day':
+                        $cursor->addDays($freq);
+                        break;
+                    case 'week':
+                        $cursor->addWeeks($freq);
+                        break;
+                    case 'month':
+                        $cursor->addMonths($freq);
+                        break;
+                    case 'year':
+                        $cursor->addYears($freq);
+                        break;
+                    default:
+                        return [];
                 }
             }
 
@@ -197,11 +226,20 @@ class Events extends Model
                     $results[] = $cursor->copy();
                 }
                 switch ($freqTerm) {
-                    case 'day':   $cursor->addDays($freq);   break;
-                    case 'week':  $cursor->addWeeks($freq);  break;
-                    case 'month': $cursor->addMonths($freq); break;
-                    case 'year':  $cursor->addYears($freq);  break;
-                    default:      break 2;
+                    case 'day':
+                        $cursor->addDays($freq);
+                        break;
+                    case 'week':
+                        $cursor->addWeeks($freq);
+                        break;
+                    case 'month':
+                        $cursor->addMonths($freq);
+                        break;
+                    case 'year':
+                        $cursor->addYears($freq);
+                        break;
+                    default:
+                        break 2;
                 }
             }
         }

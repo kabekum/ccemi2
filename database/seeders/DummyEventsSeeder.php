@@ -95,7 +95,7 @@ class DummyEventsSeeder extends Seeder
                     'updated_by'   => $admin->id,
                 ]);
 
-                factory(\App\Models\EventGallery::class, rand(5, 15))->create([
+                EventGallery::factory()->count(rand(5, 15))->create([
                     'event_id'   => $event->id,
                     'church_id'  => $church->id,
                     'created_by' => $admin->id,

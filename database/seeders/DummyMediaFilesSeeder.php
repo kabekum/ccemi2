@@ -20,7 +20,7 @@ class DummyMediaFilesSeeder extends Seeder
         {
             $admin = User::where([['church_id',$church->id],['usergroup_id',3]])->first();
             
-            factory(MediaFile::class, 10)->create([
+            MediaFile::factory()->count(10)->create([
                 'church_id'  => $church->id,
                 'created_by' => $admin->id, 
                 'updated_by' => $admin->id

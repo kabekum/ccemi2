@@ -22,7 +22,7 @@ class DummyHelpsSeeder extends Seeder
 
             $user = array_rand($users);
 
-            factory(Help::class,2)->create([
+            Help::factory()->count(2)->create([
                 'church_id'	=> 	$church->id,
                 'user_id'   =>	$user,
                 'status' 	=> 	'approve',

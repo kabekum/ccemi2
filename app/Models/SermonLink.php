@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\Common;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
  * SermonLink Model
@@ -33,21 +34,28 @@ class SermonLink extends Model
     //
     use SoftDeletes;
     use Common;
-
+    use HasFactory;
     /**
-      * The table associated with the model.
-      *
-      * @var string
-      */
+     * The table associated with the model.
+     *
+     * @var string
+     */
     protected $table = 'sermons_links';
 
     /**
-      * The attributes that are mass assignable.
-      *
-      * @var array
+     * The attributes that are mass assignable.
+     *
+     * @var array
      */
     protected $fillable = [
-        'church_id', 'user_id', 'sermons_id', 'title', 'date', 'video_link', 'audio_link', 'pdf_link',
+        'church_id',
+        'user_id',
+        'sermons_id',
+        'title',
+        'date',
+        'video_link',
+        'audio_link',
+        'pdf_link',
     ];
 
     /**
@@ -60,17 +68,17 @@ class SermonLink extends Model
 
     public function sermons()
     {
-        return $this->belongsTo('App\Models\Sermon','sermons_id');
+        return $this->belongsTo('App\Models\Sermon', 'sermons_id');
     }
 
     public function church()
     {
-        return $this->belongsTo('App\Models\Church','church_id');
+        return $this->belongsTo('App\Models\Church', 'church_id');
     }
 
     public function user()
     {
-        return $this->belongsTo('App\Models\User','user_id');
+        return $this->belongsTo('App\Models\User', 'user_id');
     }
 
     public function getUrlPathAttribute()

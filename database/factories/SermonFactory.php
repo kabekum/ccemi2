@@ -1,20 +1,20 @@
 <?php
 
-use Faker\Generator as Faker;
+namespace Database\Factories;
 
-$factory->define(App\Models\Sermon::class, function (Faker $faker) {
+use App\Models\Sermon;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
-	$cover_image   = $faker->imageUrl($width = 640, $height = 480);
-	$title         = $faker->realText(rand(10,20));
-	$description   = $faker->realText(rand(40,50));
+class SermonFactory extends Factory
+{
+    protected $model = Sermon::class;
 
-	 return [ 
-
-	 'title'       => $title,
-     'description' => $description,
-     'cover_image' => $cover_image,
-    
-
-
-    ];
-});
+    public function definition(): array
+    {
+        return [
+            'title'       => $this->faker->realText(rand(10, 20)),
+            'description' => $this->faker->realText(rand(40, 50)),
+            'cover_image' => $this->faker->imageUrl(640, 480),
+        ];
+    }
+}

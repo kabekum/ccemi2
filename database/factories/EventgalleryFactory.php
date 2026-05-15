@@ -1,9 +1,18 @@
 <?php
 
-use Faker\Generator as Faker;
+namespace Database\Factories;
 
-$factory->define(App\Models\EventGallery::class, function (Faker $faker) {
-	return [
-    	'path' => $faker->imageUrl($width = 640, $height = 480),
-    ];
-});
+use App\Models\EventGallery;
+use Illuminate\Database\Eloquent\Factories\Factory;
+
+class EventGalleryFactory extends Factory
+{
+    protected $model = EventGallery::class;
+
+    public function definition(): array
+    {
+        return [
+            'path' => $this->faker->imageUrl(640, 480),
+        ];
+    }
+}

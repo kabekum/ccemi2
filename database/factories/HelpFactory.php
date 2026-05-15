@@ -1,15 +1,20 @@
 <?php
 
-/** @var \Illuminate\Database\Eloquent\Factory $factory */
+namespace Database\Factories;
 
 use App\Models\Help;
-use Faker\Generator as Faker;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
-$factory->define(Help::class, function (Faker $faker) {
-    return [
-        //
-    	'title'				=>	$faker->realText(rand(10,20)),
-    	'description'		=>	$faker->text,
-    	'contact_details'	=>	$faker->unique()->randomNumber($nbDigits = 9, $strict = false),
-    ];
-});
+class HelpFactory extends Factory
+{
+    protected $model = Help::class;
+
+    public function definition(): array
+    {
+        return [
+            'title'           => $this->faker->realText(rand(10, 20)),
+            'description'     => $this->faker->text,
+            'contact_details' => $this->faker->unique()->randomNumber(9, false),
+        ];
+    }
+}

@@ -18,19 +18,19 @@ class DummyPrayerRequestsSeeder extends Seeder
 
             if ($userIds->isEmpty()) continue;
 
-            factory(Prayer::class, 5)->create([
+            Prayer::factory()->count(5)->create([
                 'church_id' => $church->id,
                 'user_id'   => $userIds->random(),
                 'status'    => Prayer::STATUS_ACTIVE,
             ]);
 
-            factory(Prayer::class, 2)->create([
+            Prayer::factory()->count(2)->create([
                 'church_id' => $church->id,
                 'user_id'   => $userIds->random(),
                 'status'    => Prayer::STATUS_ANSWERED,
             ]);
 
-            factory(Prayer::class, 3)->create([
+            Prayer::factory()->count(3)->create([
                 'church_id' => $church->id,
                 'user_id'   => $userIds->random(),
                 'status'    => Prayer::STATUS_PENDING,

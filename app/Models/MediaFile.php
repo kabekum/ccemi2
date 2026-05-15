@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\Common;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
  * MediaFile Model
@@ -28,25 +29,33 @@ use App\Traits\Common;
  */
 class MediaFile extends Model
 {
-	//
+    //
     use SoftDeletes;
-	use Common;
+    use Common;
+    use HasFactory;
 
     /**
      * The table associated with the model.
      *
      * @var string
      */
-    protected $table='media_files';
+    protected $table = 'media_files';
 
     /**
      * The attributes that are mass assignable.
      *
      * @var array
      */
-	protected $fillable = [
-	    'church_id' , 'media_type' , 'name' , 'description' , 'type' , 'url' , 'created_by' , 'updated_by'
-	];
+    protected $fillable = [
+        'church_id',
+        'media_type',
+        'name',
+        'description',
+        'type',
+        'url',
+        'created_by',
+        'updated_by'
+    ];
 
     /**
      * The attributes that should be mutated to dates.
@@ -57,11 +66,11 @@ class MediaFile extends Model
 
     public function church()
     {
-        return $this->belongsTo('App\Models\Church','church_id');
+        return $this->belongsTo('App\Models\Church', 'church_id');
     }
 
-	public function getUrlPathAttribute()
-	{
-		return $this->getFilePath($this->url);
-	}
+    public function getUrlPathAttribute()
+    {
+        return $this->getFilePath($this->url);
+    }
 }

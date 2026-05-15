@@ -1,15 +1,20 @@
 <?php
 
-/** @var \Illuminate\Database\Eloquent\Factory $factory */
+namespace Database\Factories;
 
 use App\Models\PrayerRequest;
-use Faker\Generator as Faker;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
-$factory->define(PrayerRequest::class, function (Faker $faker) {
-    return [
-        //
-    	'title'			=>	$faker->realText(rand(10,20)),
-    	'description'	=>	$faker->text,
-    	'date'			=>	$faker->dateTimeThisYear($max = 'now', $timezone = null),
-    ];
-});
+class PrayerRequestFactory extends Factory
+{
+    protected $model = PrayerRequest::class;
+
+    public function definition(): array
+    {
+        return [
+            'title'       => $this->faker->realText(rand(10, 20)),
+            'description' => $this->faker->text,
+            'date'        => $this->faker->dateTimeThisYear(),
+        ];
+    }
+}

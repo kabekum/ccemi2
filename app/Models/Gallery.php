@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\Common;
 use App\Models\Photos;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
  * Gallery Model
@@ -33,33 +34,38 @@ class Gallery extends Model
     //
     use SoftDeletes;
     use Common;
+    use HasFactory;
 
     /**
-      * The table associated with the model.
-      *
-      * @var string
-    */
-	protected $table = 'galleries';
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'galleries';
 
     /**
-      * The attributes that are mass assignable.
-      *
-      * @var array
-    */
-	protected $fillable = [
-        'church_id' , 'name' , 'description' , 'path' , 'created_by' , 'updated_by'
-	];
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'church_id',
+        'name',
+        'description',
+        'path',
+        'created_by',
+        'updated_by'
+    ];
 
     public function photos()
     {
-        return $this->hasMany('App\Models\Photos','gallery_id','id');
+        return $this->hasMany('App\Models\Photos', 'gallery_id', 'id');
     }
 
-    public function scopeByName($query , $name)
+    public function scopeByName($query, $name)
     {
-        $query->where(function ($query) use($name)
-        {
-            $query->where('name','LIKE',$name.'%');
+        $query->where(function ($query) use ($name) {
+            $query->where('name', 'LIKE', $name . '%');
         });
 
         return $query;
@@ -76,6 +82,6 @@ class Gallery extends Model
 
     public function getPhotoCount($gallery_id)
     {
-        return Photos::where('gallery_id',$gallery_id)->count();
+        return Photos::where('gallery_id', $gallery_id)->count();
     }
 }

@@ -4,6 +4,8 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\Church;
+use App\Models\Gallery;
+use App\Models\Photos;
 use App\Models\User;
 
 class DummyGallerySeeder extends Seeder
@@ -23,12 +25,12 @@ class DummyGallerySeeder extends Seeder
 
             $this->command->info("Seeding galleries for church: {$church->name}...");
 
-            factory(\App\Models\Gallery::class, 8)->create([
+            Gallery::factory()->count(8)->create([
                 'church_id'  => $church->id,
                 'created_by' => $admin->id,
                 'updated_by' => $admin->id,
             ])->each(function ($gallery) use ($church, $admin) {
-                factory(\App\Models\Photos::class, rand(8, 20))->create([
+                Photos::factory()->count(rand(8, 20))->create([
                     'gallery_id' => $gallery->id,
                     'church_id'  => $church->id,
                     'created_by' => $admin->id,

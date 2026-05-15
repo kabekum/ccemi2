@@ -19,7 +19,7 @@ class DummyFundsSeeder extends Seeder
         foreach ($churchs as $church) 
         {
             $admin = User::where([['church_id',$church->id],['usergroup_id',3]])->first();
-            factory(Fund::class, 20)->create([
+            Fund::factory()->count(20)->create([
                 'church_id'     =>  $church->id,
                 'authorised_by' =>  $admin->id,
                 'status'        =>  'deposited',

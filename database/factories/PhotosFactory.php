@@ -1,9 +1,18 @@
 <?php
 
-use Faker\Generator as Faker;
+namespace Database\Factories;
 
-$factory->define(App\Models\Photos::class, function (Faker $faker) {
-    return [
-        'path' => 'uploads/galleries/photos/' . $faker->lexify('????????') . '.jpg',
-    ];
-});
+use App\Models\Photos;
+use Illuminate\Database\Eloquent\Factories\Factory;
+
+class PhotosFactory extends Factory
+{
+    protected $model = Photos::class;
+
+    public function definition(): array
+    {
+        return [
+            'path' => 'uploads/galleries/photos/' . $this->faker->lexify('????????') . '.jpg',
+        ];
+    }
+}

@@ -59,7 +59,7 @@ class DummyPrayerBoardSeeder extends Seeder
 
         // ── PENDING (8 prayers) ──────────────────────────────────────────────
         for ($i = 0; $i < 8; $i++) {
-            factory(Prayer::class)->states('pending')->create([
+            Prayer::factory()->pending()->create([
                 'church_id'   => $churchId,
                 'category_id' => $categories->random()->id,
                 'user_id'     => $this->pick($members),
@@ -70,10 +70,10 @@ class DummyPrayerBoardSeeder extends Seeder
         // ── ACTIVE (12 prayers, 2 pinned) ────────────────────────────────────
         $activePrayers = collect();
         for ($i = 0; $i < 12; $i++) {
-            $state  = ($i < 2) ? 'pinned' : 'active';
-            $userId = $this->pick($members);
+            $userId  = $this->pick($members);
+            $factory = ($i < 2) ? Prayer::factory()->pinned() : Prayer::factory()->active();
 
-            $prayer = factory(Prayer::class)->states($state)->create([
+            $prayer = $factory->create([
                 'church_id'   => $churchId,
                 'category_id' => $categories->random()->id,
                 'user_id'     => $userId,
@@ -91,7 +91,7 @@ class DummyPrayerBoardSeeder extends Seeder
         // ── ANSWERED (6 prayers) ─────────────────────────────────────────────
         $answeredPrayers = collect();
         for ($i = 0; $i < 6; $i++) {
-            $prayer = factory(Prayer::class)->states('answered')->create([
+            $prayer = Prayer::factory()->answered()->create([
                 'church_id'   => $churchId,
                 'category_id' => $categories->random()->id,
                 'user_id'     => $this->pick($members),
@@ -107,7 +107,7 @@ class DummyPrayerBoardSeeder extends Seeder
         // ── ENDED (6 prayers) ────────────────────────────────────────────────
         $endedPrayers = collect();
         for ($i = 0; $i < 6; $i++) {
-            $prayer = factory(Prayer::class)->states('ended')->create([
+            $prayer = Prayer::factory()->ended()->create([
                 'church_id'   => $churchId,
                 'category_id' => $categories->random()->id,
                 'user_id'     => $this->pick($members),
@@ -121,7 +121,7 @@ class DummyPrayerBoardSeeder extends Seeder
 
         // ── REJECTED (4 prayers) ─────────────────────────────────────────────
         for ($i = 0; $i < 4; $i++) {
-            factory(Prayer::class)->states('rejected')->create([
+            Prayer::factory()->rejected()->create([
                 'church_id'   => $churchId,
                 'category_id' => $categories->random()->id,
                 'user_id'     => $this->pick($members),
@@ -132,7 +132,7 @@ class DummyPrayerBoardSeeder extends Seeder
 
         // ── UNPUBLISHED (3 prayers) ──────────────────────────────────────────
         for ($i = 0; $i < 3; $i++) {
-            factory(Prayer::class)->states('unpublished')->create([
+            Prayer::factory()->unpublished()->create([
                 'church_id'   => $churchId,
                 'category_id' => $categories->random()->id,
                 'user_id'     => $this->pick($members),

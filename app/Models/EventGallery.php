@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\Common;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
  * EventGallery Model
@@ -31,6 +32,7 @@ class EventGallery extends Model
 {
     use SoftDeletes;
     use Common;
+    use HasFactory;
 
     /**
      * The table associated with the model.
@@ -44,22 +46,26 @@ class EventGallery extends Model
      *
      * @var array
      */
-    protected $fillable=[
-    	'church_id' , 'event_id' , 'path' , 'created_by' , 'updated_by'
+    protected $fillable = [
+        'church_id',
+        'event_id',
+        'path',
+        'created_by',
+        'updated_by'
     ];
 
     public function church()
     {
-        return $this->belongsTo('App\Models\Church','church_id');
+        return $this->belongsTo('App\Models\Church', 'church_id');
     }
 
     public function events()
     {
-        return $this->belongsTo('App\Models\Events','event_id');
+        return $this->belongsTo('App\Models\Events', 'event_id');
     }
 
     public function getFullPathAttribute()
     {
-    	return $this->getFilePath($this->path);
+        return $this->getFilePath($this->path);
     }
 }

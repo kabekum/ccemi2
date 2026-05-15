@@ -1,20 +1,27 @@
 <?php
 
-use Faker\Generator as Faker;
+namespace Database\Factories;
 
-$factory->define(App\Models\Group::class, function (Faker $faker) {
-	$faker->addProvider(new \Faker\Provider\en_US\Text($faker));
+use App\Models\Group;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
-	$category_id = $faker->numberBetween($min=1,$max=7);
-	$name = $faker->sentence($nbWords = 3, $variableNbWords = true);
-	$cover_image = $faker->imageUrl($width = 640, $height = 480);
-	$description = $faker->text;
-	$group_type = $faker->randomElement(['common_interests','everyone','married_couples','men','women','young_adults','youth']);
-    return [
-    	'category_id' 	=> $category_id,
-    	'name' 			=> $name,
-    	'cover_image' 	=> $cover_image,
-    	'description' 	=> $description,
-    	'group_type' 	=> $group_type,
-    ];
-});
+class GroupFactory extends Factory
+{
+    protected $model = Group::class;
+
+    public function definition(): array
+    {
+        $this->faker->addProvider(new \Faker\Provider\en_US\Text($this->faker));
+
+        return [
+            'category_id' => $this->faker->numberBetween(1, 7),
+            'name'        => $this->faker->sentence(3),
+            'cover_image' => $this->faker->imageUrl(640, 480),
+            'description' => $this->faker->text,
+            'group_type'  => $this->faker->randomElement([
+                'common_interests', 'everyone', 'married_couples',
+                'men', 'women', 'young_adults', 'youth',
+            ]),
+        ];
+    }
+}

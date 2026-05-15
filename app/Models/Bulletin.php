@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\Common;
@@ -32,8 +33,7 @@ use App\Traits\Common;
 class Bulletin extends Model
 {
     //
-    use SoftDeletes;
-    use Common;
+    use HasFactory, SoftDeletes, Common;
 
     /**
      * The table associated with the model.

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\Common;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
  * Campaign Model
@@ -35,22 +36,27 @@ class Campaign extends Model
     //
     use SoftDeletes;
     use Common;
+    use HasFactory;
 
     /**
-      * The table associated with the model.
-      *
-      * @var string
-    */
-	protected $table = 'campaign';
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'campaign';
 
     /**
-      * The attributes that are mass assignable.
-      *
-      * @var array
-    */
-	protected $fillable = [
-        'church_id' , 'name' , 'description' , 'status' , 'mailinglist_id'
-	];
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'church_id',
+        'name',
+        'description',
+        'status',
+        'mailinglist_id'
+    ];
 
     public function emails()
     {
@@ -74,16 +80,16 @@ class Campaign extends Model
 
     public function queue()
     {
-        return $this->hasMany('App\Models\MailQueue','campaign_id','id');
+        return $this->hasMany('App\Models\MailQueue', 'campaign_id', 'id');
     }
 
     public function campaignEmail()
     {
-        return $this->hasMany('App\Models\CampaignEmail','campaign_id','id');
+        return $this->hasMany('App\Models\CampaignEmail', 'campaign_id', 'id');
     }
 
     public function rule()
     {
-        return $this->hasMany('App\Models\GetResponse','campaign_id','id');
+        return $this->hasMany('App\Models\GetResponse', 'campaign_id', 'id');
     }
 }

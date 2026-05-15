@@ -3,9 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class PrayerCategory extends Model
 {
+    use HasFactory;
     protected $table = 'prayer_categories';
 
     protected $fillable = [

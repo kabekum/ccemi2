@@ -1,13 +1,22 @@
 <?php
 
-use Faker\Generator as Faker;
+namespace Database\Factories;
 
-$factory->define(App\Models\SermonLink::class, function (Faker $faker) {
-    return [
-        'title'      => $faker->sentence(4),
-        'video_link' => $faker->optional()->url,
-        'audio_link' => $faker->optional()->url,
-        'pdf_link'   => $faker->optional()->url,
-        'date'       => $faker->dateTimeBetween('-2 years', 'now'),
-    ];
-});
+use App\Models\SermonLink;
+use Illuminate\Database\Eloquent\Factories\Factory;
+
+class SermonLinkFactory extends Factory
+{
+    protected $model = SermonLink::class;
+
+    public function definition(): array
+    {
+        return [
+            'title'      => $this->faker->sentence(4),
+            'video_link' => $this->faker->optional()->url,
+            'audio_link' => $this->faker->optional()->url,
+            'pdf_link'   => $this->faker->optional()->url,
+            'date'       => $this->faker->dateTimeBetween('-2 years', 'now'),
+        ];
+    }
+}

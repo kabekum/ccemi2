@@ -1,12 +1,20 @@
 <?php
 
-use Faker\Generator as Faker;
+namespace Database\Factories;
 
-$factory->define(App\Models\PermissionUser::class, function (Faker $faker) {
-    return [
-        //
-    	'user_type' 	=> "App\Models\User",
-    	'created_at' 	=> date("Y-m-d H:i:s"),
-        'updated_at'	=> date("Y-m-d H:i:s"),
-    ];
-});
+use App\Models\PermissionUser;
+use Illuminate\Database\Eloquent\Factories\Factory;
+
+class PermissionUserFactory extends Factory
+{
+    protected $model = PermissionUser::class;
+
+    public function definition(): array
+    {
+        return [
+            'user_type'  => 'App\Models\User',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ];
+    }
+}
