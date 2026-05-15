@@ -58,34 +58,34 @@ class DummySermonDataSeeder extends Seeder
             'title'       => 'The Prodigal Father',
             'description' => 'A fresh reading of Luke 15:11-32 — not the son\'s waywardness but the father\'s scandalous, running, robe-giving, ring-placing welcome home. Grace reframed.',
         ],
-        [
-            'title'       => 'Forgiven to Forgive',
-            'description' => 'Matthew 18:21-35 examined. How the parable of the unmerciful servant challenges every believer to extend the same mercy they have freely received from God.',
-        ],
-        [
-            'title'       => 'Being Still Before God',
-            'description' => 'Psalm 46:10 meditated upon — in a noisy, frenzied world, what does it cost to be truly still before God? A call to contemplative faith and Sabbath trust.',
-        ],
-        [
-            'title'       => 'More Than Conquerors',
-            'description' => 'Romans 8:31-39 proclaimed — nothing in all creation can separate us from the love of God. A triumphant declaration for every believer walking through trials.',
-        ],
-        [
-            'title'       => 'The Sermon on the Mount – Blessed Are the Poor in Spirit',
-            'description' => 'Matthew 5:3, part one of an eight-week Beatitudes series. What does spiritual poverty look like, and why does Jesus call it the gateway to the Kingdom?',
-        ],
-        [
-            'title'       => 'Streams of Living Water',
-            'description' => 'John 7:37-39 expounded — Jesus\'s invitation to all who are thirsty. An exploration of what it means to drink deeply of the Holy Spirit in everyday life.',
-        ],
-        [
-            'title'       => 'The Lord Is My Shepherd',
-            'description' => 'Psalm 23 unpacked phrase by phrase — green pastures, still waters, the valley of the shadow, the table before enemies. A message of intimate divine care.',
-        ],
-        [
-            'title'       => 'Called, Chosen, and Faithful',
-            'description' => 'Revelation 17:14 — a missional sermon on the church\'s identity and purpose. We are not accidents; we are His called-out, chosen, and faithful people sent into the world.',
-        ],
+        // [
+        //     'title'       => 'Forgiven to Forgive',
+        //     'description' => 'Matthew 18:21-35 examined. How the parable of the unmerciful servant challenges every believer to extend the same mercy they have freely received from God.',
+        // ],
+        // [
+        //     'title'       => 'Being Still Before God',
+        //     'description' => 'Psalm 46:10 meditated upon — in a noisy, frenzied world, what does it cost to be truly still before God? A call to contemplative faith and Sabbath trust.',
+        // ],
+        // [
+        //     'title'       => 'More Than Conquerors',
+        //     'description' => 'Romans 8:31-39 proclaimed — nothing in all creation can separate us from the love of God. A triumphant declaration for every believer walking through trials.',
+        // ],
+        // [
+        //     'title'       => 'The Sermon on the Mount – Blessed Are the Poor in Spirit',
+        //     'description' => 'Matthew 5:3, part one of an eight-week Beatitudes series. What does spiritual poverty look like, and why does Jesus call it the gateway to the Kingdom?',
+        // ],
+        // [
+        //     'title'       => 'Streams of Living Water',
+        //     'description' => 'John 7:37-39 expounded — Jesus\'s invitation to all who are thirsty. An exploration of what it means to drink deeply of the Holy Spirit in everyday life.',
+        // ],
+        // [
+        //     'title'       => 'The Lord Is My Shepherd',
+        //     'description' => 'Psalm 23 unpacked phrase by phrase — green pastures, still waters, the valley of the shadow, the table before enemies. A message of intimate divine care.',
+        // ],
+        // [
+        //     'title'       => 'Called, Chosen, and Faithful',
+        //     'description' => 'Revelation 17:14 — a missional sermon on the church\'s identity and purpose. We are not accidents; we are His called-out, chosen, and faithful people sent into the world.',
+        // ],
     ];
 
     // ─── YouTube example URLs (public domain / creative commons sermons) ─────
@@ -147,12 +147,27 @@ class DummySermonDataSeeder extends Seeder
             // Spread created_at across the last 18 months
             $createdAt = $now->copy()->subDays(rand($idx * 5, $idx * 5 + 30));
 
+            $paths = [
+                'uploads/Images/Sermons/sermons4.jpg',
+                'uploads/Images/Sermons/sermons5.jpg',
+                'uploads/Images/Sermons/sermons6.jpg',
+                'uploads/Images/Sermons/sermons7.jpg',
+                'uploads/Images/Sermons/sermons8.jpg',
+                'uploads/Images/Sermons/sermons9.jpg',
+                'uploads/Images/Sermons/sermons10.jpg',
+                'uploads/Images/Sermons/sermons11.jpg',
+                'uploads/Images/Sermons/sermons12.jpg',
+                'https://picsum.photos/seed/sermon' . ($idx + 1) . '/640/360'
+            ];
+
+
+
             $sermonId = DB::table('sermons')->insertGetId([
                 'church_id'   => $churchId,
                 'user_id'     => $preacherId,
                 'title'       => $def['title'],
                 'description' => $def['description'],
-                'cover_image' => 'https://picsum.photos/seed/sermon' . ($idx + 1) . '/640/360',
+                'cover_image' => url($paths[array_rand($paths)]),
                 'created_at'  => $createdAt,
                 'updated_at'  => $createdAt,
             ]);

@@ -29,12 +29,12 @@ class DemoDataSeeder extends Seeder
 
         $this->call([
             // Church & users (foundation for all other demo data)
-            //DummyChurchSeeder::class,
-            //DummyChurchDetailSeeder::class,
+            DummyChurchSeeder::class,
+            DummyChurchDetailSeeder::class,
 
             // Content
-            //DummyEventsSeeder::class,
-            //DummyUpcomingEventsSeeder::class,
+            DummyEventsSeeder::class,
+            DummyUpcomingEventsSeeder::class,
             DummyGallerySeeder::class,
             DummyBulletinsSeeder::class,
             DummySermonSeeder::class,

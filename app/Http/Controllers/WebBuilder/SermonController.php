@@ -9,10 +9,17 @@ class SermonController extends Controller
 {
     public function index()
     {
-        $grouped = Sermon::with('user')
-                         ->orderBy('created_at', 'desc')
-                         ->get()
-                         ->groupBy('user_id');
+        // $grouped = Sermon::with('user')
+        //                  ->orderBy('created_at', 'desc')
+        //                  ->get()
+        //                  ->groupBy('user_id');
+
+        $grouped = Sermon::with(['user', 'sermonlinks'])
+            ->whereHas('sermonlinks')
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->groupBy('user_id');
+
 
         return view('theme::sermon_index', compact('grouped'));
     }
