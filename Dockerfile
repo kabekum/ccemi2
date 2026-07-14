@@ -1,48 +1,55 @@
-# Step 1: Use an official PHP image with Apache
+# ==========================================
+# STAGE 1: COMPOSER BUILDER
+# ==========================================
+FROM composer:latest AS builder
+
+WORKDIR /app
+
+# Copy only the package lists first (helps Docker cache layers)
+COPY composer.json composer.lock ./
+
+# Install dependencies using Composer's official highly-optimized internal binaries
+RUN COMPOSER_MEMORY_LIMIT=-1 composer install \
+    --no-dev \
+    --ignore-platform-reqs \
+    --no-interaction \
+    --no-plugins \
+    --no-scripts \
+    --prefer-dist
+
+# Copy the rest of the application code into the builder stage
+COPY . .
+
+# ==========================================
+# STAGE 2: FINAL RUNTIME ENVIRONMENT
+# ==========================================
 FROM php:8.2-apache
 
-# Step 2: Install system dependencies & PHP extensions needed for Laravel
+# Install minimal runtime extensions needed for Laravel execution
 RUN apt-get update && apt-get install -y \
     libpng-dev \
     libjpeg-dev \
     libfreetype6-dev \
     libzip-dev \
     zip \
-    unzip \
-    git \
-    curl \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install pdo_mysql gd zip
+    && docker-php-ext-install pdo_mysql gd zip \
+    && rm -rf /var/lib/apt/lists/*
 
-# Step 3: Enable Apache Mod_Rewrite for Laravel routing
+# Enable Apache Mod_Rewrite
 RUN a2enmod rewrite
-
-
-# Step 4: Copy Apache VirtualHost configuration
 COPY docker/apache.conf /etc/apache2/sites-available/000-default.conf
 RUN a2ensite 000-default.conf
 
-# Step 5: Install Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-
-# Step 6: Set working directory
 WORKDIR /var/www/html
 
-# Step 7: Copy existing application code
-COPY . .
+# Copy the application from Stage 1 (This brings along the pre-built vendor folder!)
+COPY --from=builder /app /var/www/html
 
-# Step 8: Create a temporary swap file and install dependencies
-RUN fallocate -l 1G /swapfile || dd if=/dev/zero of=/swapfile bs=1M count=1024 \
-    && chmod 600 /swapfile \
-    && mkswap /swapfile \
-    && swapon /swapfile || true \
-    && COMPOSER_MEMORY_LIMIT=-1 composer install --no-dev --optimize-autoloader --no-interaction \
-    && swapoff /swapfile || true \
-    && rm /swapfile || true
-
-# Step 9: Set permissions for Laravel storage and cache directories
+# Fix permissions for execution
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache \
     && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
-# Step 10: Start Apache server
+EXPOSE 80
+
 CMD ["apache2-foreground"]
