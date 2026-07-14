@@ -17,8 +17,9 @@ RUN apt-get update && apt-get install -y \
 # Step 3: Enable Apache Mod_Rewrite for Laravel routing
 RUN a2enmod rewrite
 
+
 # Step 4: Copy Apache VirtualHost configuration
-COPY docker/apache.conf /etc/apache2/sites-available/0000-default.conf
+COPY docker/apache.conf /etc/apache2/sites-available/000-default.conf
 RUN a2ensite 000-default.conf
 
 # Step 5: Install Composer
