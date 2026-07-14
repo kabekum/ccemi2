@@ -28,11 +28,11 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Step 6: Set working directory
 WORKDIR /var/www/html
 
-# Step 7: Copy existing application code
-COPY . .
+# Step 7: Copy existing application code and set ownership immediately
+COPY --chown=www-data:www-data . .
 
-# Step 8: Set permissions for Laravel storage and cache directories
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+# Step 8: Set explicit permissions for Laravel storage and cache
+RUN chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
 # Step 9: Expose port 80
 EXPOSE 80
