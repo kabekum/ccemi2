@@ -1,31 +1,6 @@
-# ==========================================
-# STAGE 1: COMPOSER BUILDER
-# ==========================================
-FROM composer:latest AS builder
-
-WORKDIR /app
-
-# Copy only the package lists first (helps Docker cache layers)
-COPY composer.json composer.lock ./
-
-# Install dependencies using Composer's official highly-optimized internal binaries
-RUN COMPOSER_MEMORY_LIMIT=-1 composer install \
-    --no-dev \
-    --ignore-platform-reqs \
-    --no-interaction \
-    --no-plugins \
-    --no-scripts \
-    --prefer-dist
-
-# Copy the rest of the application code into the builder stage
-COPY . .
-
-# ==========================================
-# STAGE 2: FINAL RUNTIME ENVIRONMENT
-# ==========================================
 FROM php:8.2-apache
 
-# Install minimal runtime extensions needed for Laravel execution
+# 1. Install minimal runtime extensions needed for Laravel
 RUN apt-get update && apt-get install -y \
     libpng-dev \
     libjpeg-dev \
@@ -36,17 +11,17 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-install pdo_mysql gd zip \
     && rm -rf /var/lib/apt/lists/*
 
-# Enable Apache Mod_Rewrite
+# 2. Enable Apache Mod_Rewrite
 RUN a2enmod rewrite
 COPY docker/apache.conf /etc/apache2/sites-available/000-default.conf
 RUN a2ensite 000-default.conf
 
 WORKDIR /var/www/html
 
-# Copy the application from Stage 1 (This brings along the pre-built vendor folder!)
-COPY --from=builder /app /var/www/html
+# 3. Copy EVERYTHING (including the vendor folder you just generated)
+COPY . .
 
-# Fix permissions for execution
+# 4. Fix permissions
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache \
     && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
