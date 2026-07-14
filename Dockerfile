@@ -31,9 +31,14 @@ WORKDIR /var/www/html
 # Step 7: Copy existing application code
 COPY . .
 
-# Step 8: Install PHP dependencies via Composer
-# (This creates the missing /vendor/ folder)
-RUN composer install --no-dev --optimize-autoloader --no-interaction
+# Step 8: Install PHP dependencies with strict memory limits
+RUN COMPOSER_MEMORY_LIMIT=-1 composer install \
+    --no-dev \
+    --optimize-autoloader \
+    --no-interaction \
+    --no-plugins \
+    --no-scripts \
+    --prefer-dist
 
 # Step 9: Set permissions for Laravel storage and cache directories
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache \
