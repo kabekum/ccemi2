@@ -1,0 +1,8 @@
+{
+  "name": "Laravel Dev Environment",
+  "build": {
+    "dockerfile": "../Dockerfile"
+  },
+  "forwardPorts": [80],
+  "remoteUser": "root"
+}
