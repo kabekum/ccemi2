@@ -11,17 +11,20 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-install pdo_mysql gd zip \
     && rm -rf /var/lib/apt/lists/*
 
-# 2. Enable Apache Mod_Rewrite
+# 2. Install Composer (Crucial Fix)
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# 3. Enable Apache Mod_Rewrite
 RUN a2enmod rewrite
 COPY docker/apache.conf /etc/apache2/sites-available/000-default.conf
 RUN a2ensite 000-default.conf
 
 WORKDIR /var/www/html
 
-# 3. Copy EVERYTHING (including the vendor folder you just generated)
+# 4. Copy EVERYTHING
 COPY . .
 
-# 4. Fix permissions
+# 5. Fix permissions
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache \
     && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
