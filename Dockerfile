@@ -28,14 +28,16 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Step 6: Set working directory
 WORKDIR /var/www/html
 
-# Step 7: Copy existing application code and set ownership immediately
-COPY --chown=www-data:www-data . .
+# Step 7: Copy existing application code
+COPY . .
 
-# Step 8: Set explicit permissions for Laravel storage and cache
-RUN chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
+# Step 8: Install PHP dependencies via Composer
+# (This creates the missing /vendor/ folder)
+RUN composer install --no-dev --optimize-autoloader --no-interaction
 
-# Step 9: Expose port 80
-EXPOSE 80
+# Step 9: Set permissions for Laravel storage and cache directories
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache \
+    && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
 # Step 10: Start Apache server
 CMD ["apache2-foreground"]
