@@ -1,4 +1,4 @@
-FROM php:8.2-apache-bookworm
+FROM php:8.2-apache-bullseye
 
 # 1. Install minimal runtime extensions needed for Laravel
 RUN apt-get update && apt-get install -y \
